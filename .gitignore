@@ -32,13 +32,7 @@ share/python-wheels/
 *.swp
 *.swo
 
-# Project specific exclusions (Lọc file nặng không đẩy lên git)
-*.mp4
-*.mkv
-*.avi
-*.mov
-*.wav
-*.mp3
+# Project specific exclusions (Lọc file rác/checkpoint trung gian không cần đẩy lên git)
 *.pkl
 *.pth
 *.pt
@@ -51,10 +45,6 @@ Ccrop_id1_frame_*
 
 # Cho phép đẩy các mô hình tflite triển khai nhẹ trong thư mục models/
 !models/*.tflite
-
-# Đẩy đầy đủ dataset trong data/ (audio .wav bị *.wav ở trên chặn nên cần mở lại)
-!data/**/*.wav
-!data/**/*.npy
 
 # Thư mục chứa các bản nháp Notebook cũ
 drafts/
