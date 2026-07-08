@@ -1,0 +1,5 @@
+Record=TopLevelDocument|FileName=01_Power.SchDoc|SheetNumber=1
+Record=NoMainPathDocument|SourceDocument=01_Power.SchDoc|FileName=02_CV25_SOM.SchDoc|SheetNumber=2
+Record=NoMainPathDocument|SourceDocument=01_Power.SchDoc|FileName=03_Ethernet.SchDoc|SheetNumber=3
+Record=NoMainPathDocument|SourceDocument=01_Power.SchDoc|FileName=04_ImageSensor.SchDoc|SheetNumber=4
+Record=NoMainPathDocument|SourceDocument=01_Power.SchDoc|FileName=05_LensControl.SchDoc|SheetNumber=5

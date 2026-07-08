@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific exclusions (Lọc file nặng không đẩy lên git)
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.wav
+*.mp3
+*.pkl
+*.pth
+*.pt
+*.onnx
+*.tflite
+deploy/logs/
+logs/
+temp/
+Ccrop_id1_frame_*
+
+# Cho phép đẩy các mô hình tflite triển khai nhẹ trong thư mục models/
+!models/*.tflite
+
+# Đẩy đầy đủ dataset trong data/ (audio .wav bị *.wav ở trên chặn nên cần mở lại)
+!data/**/*.wav
+!data/**/*.npy
+
+# Thư mục chứa các bản nháp Notebook cũ
+drafts/
+
+# Loại bỏ các file ảnh đồ thị lộn xộn ở root
+*.png
+!docs/images/*.png
+
+# Documentations
+*.pdf
+!ĐATN-LeQuangHuy-20222297.pdf
+desktop.ini
+
+# Build & runtime artifacts của camera_source (C++/CMake, chạy trên board CV25)
+camera_source/build/
+camera_source/received_frames/
+
+# File log/report tạm do Altium Designer sinh ra khi build mạch
+Project Outputs for*/
+
+# Altium Designer temporary / backup files (Giữ sạch thư mục mạch phần cứng)
+History/
+__Previews/
+*.Previews
+*.~*
+*.LOG
+*.Warning
+*.HTML
+*.PRJDOC.ZIP

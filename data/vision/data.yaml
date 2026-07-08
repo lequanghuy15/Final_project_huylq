@@ -1,0 +1,6 @@
+train: /content/drive/MyDrive/dataset_yolo/train/images
+val: /content/drive/MyDrive/dataset_yolo/valid/images
+test: /content/drive/MyDrive/dataset_yolo/test/images
+
+nc: 7
+names: ['bike', 'motorbike', 'car', 'truck', 'bus', 'pedestrian', 'exception']

@@ -1,0 +1,73 @@
+{
+  "system": {
+    "board": "Raspberry Pi 4 Model B Rev 1.5",
+    "total_ram_mb": 3796.68359375,
+    "available_ram_mb": 3554.3203125,
+    "cpu_max_mhz": 1800.0,
+    "python": "3.13.5",
+    "tflite_backend": "ai_edge_litert"
+  },
+  "file_sizes": {
+    "YOLO INT8 (640)": 2.73,
+    "Siren GRU INT8": 5.5
+  },
+  "ram": {
+    "baseline_mb": 33.66,
+    "yolo_loaded_mb": 78.89,
+    "yolo_delta_mb": 45.23,
+    "yolo_input_shape": [
+      "1",
+      "640",
+      "640",
+      "3"
+    ],
+    "yolo_input_dtype": "<class 'numpy.float32'>",
+    "siren_loaded_mb": 104.3,
+    "siren_delta_mb": 61.78,
+    "siren_input_shape": [
+      "1",
+      "40",
+      "87",
+      "1"
+    ],
+    "siren_input_dtype": "<class 'numpy.int8'>",
+    "both_loaded_mb": 160.47,
+    "both_delta_mb": 61.68,
+    "extra_estimated_mb": 4.07,
+    "total_estimated_mb": 164.5
+  },
+  "yolo_inference": {
+    "mean_ms": 599.7,
+    "median_ms": 599.7,
+    "std_ms": 0.6,
+    "min_ms": 598.6,
+    "max_ms": 600.9,
+    "fps": 1.67
+  },
+  "siren_inference": {
+    "mean_ms": 71.6,
+    "median_ms": 71.6,
+    "std_ms": 0.1,
+    "min_ms": 71.5,
+    "max_ms": 71.9
+  },
+  "bytetrack": {
+    "5_tracks_ms": 0.1317,
+    "10_tracks_ms": 0.2568,
+    "20_tracks_ms": 0.5131,
+    "50_tracks_ms": 1.2765
+  },
+  "fft": {
+    "hsv_extraction_ms": 0.477,
+    "fft_computation_ms": 0.7489
+  },
+  "video_decode": {
+    "decode_ms": 10.7,
+    "decode_fps": 93.3,
+    "resolution": "1280x720",
+    "video_fps": 15.0
+  },
+  "resize": {
+    "resize_ms": 1.723
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "pi_ip": "192.168.1.89",
+  "pi_port": 8089,
+  "resolution": "1920x1080",
+  "framerate": 20,
+  "tmc_dev": "/dev/tmc_dev0"
+}
