@@ -159,6 +159,11 @@ Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (
 **Bảng so sánh 2 vòng (đưa nguyên lên slide backup B7):** lớp bài toán (điều chỉnh vs tự tối ưu) / giá trị đặt (I_ref vs dS/dp=0) / mô hình (tĩnh tuyến tính hóa + trễ vs bản đồ đơn đỉnh) / bộ điều khiển (PI+anti-windup vs leo đồi thô→tinh) / phân tích (dự trữ biên-pha vs hội tụ) / kiểm chứng (đáp ứng quá độ vs đồ thị S(k)).
 **Điểm chung đáng nói:** cả hai vòng khép **qua mạng** — trễ vòng = phơi sáng + TCP + xử lý + UDP; đo con số trễ cụ thể để nêu (chất đo lường).
 
+**Xếp lớp môn học (câu hỏi "đây là điều khiển quá trình hay LTI?"):**
+- Iris = **bài toán điều khiển quá trình** (iris là "van tiết lưu ánh sáng": PV = độ sáng ROI, MV = vị trí khẩu độ, đối tượng khuếch đại + trễ chết, nhiễu = ánh sáng môi trường; nhận dạng **FOPDT** bằng bậc thang, chỉnh định PI theo Ziegler–Nichols/IMC) **phân tích bằng công cụ LTI** sau tuyến tính hóa. Câu chốt: "bài toán điều khiển quá trình, phân tích và chỉnh định bằng lý thuyết điều khiển tuyến tính quanh điểm làm việc."
+- Focus = **không thuộc cả hai** — tại đỉnh độ nét dS/dp = 0 nên khuếch đại tuyến tính hóa bằng 0, LTI "mù" đúng tại điểm làm việc mong muốn (lý do sâu xa phải dùng nhiễu loạn dò) → lớp điều khiển phi tuyến/tự tối ưu (extremum seeking), phân tích hội tụ.
+- Giá trị trình bày: một hệ ống kính, hai lớp bài toán — thể hiện biết dùng công cụ kinh điển VÀ biết khi nào nó hết hiệu lực.
+
 ### F3. Mục "Đánh giá độ không đảm bảo đo" cho phép đo tần số đèn (công sức thấp nhất, thuần đo lường)
 - Không cần phần cứng, chỉ phân tích + thí nghiệm nhỏ:
   - Độ phân giải tần số Δf = 1/T_cửa_sổ (5 s → 0,2 Hz); trade-off cửa sổ dài ↔ trễ phát hiện — khảo sát PNR theo độ dài cửa sổ (2/3/5/8 s).
