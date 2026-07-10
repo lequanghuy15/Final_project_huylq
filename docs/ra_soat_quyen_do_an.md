@@ -3,6 +3,8 @@
 Đối chiếu quyển PDF ↔ code trong repo ↔ sườn slide. Xếp theo mức độ ưu tiên.
 (Không lặp lại các mục đã ghi ở "GHI CHÚ ĐANG TREO" trong `slide_outline_bao_ve.md`.)
 
+> **ĐÃ CHỐT (10/07): quyển sửa được** (trong mức độ hợp lý) → mọi mục nhóm A xử lý theo hướng **sửa quyển cho khớp hệ thống thực tế**, slide bám theo quyển sau khi sửa. Kế hoạch sửa cụ thể ở cuối file.
+
 ---
 
 ## A. MÂU THUẪN NỘI DUNG QUYỂN ↔ REPO — PHẢI CHỐT TRƯỚC KHI LÀM SLIDE
@@ -77,3 +79,46 @@
 3. Dữ liệu thực địa 15–26/06/2026 tại Hà Đông (Bảng 3-3) — chuẩn bị mô tả cách xác định "ground truth" 79 xe ưu tiên (ai đếm, bằng gì) — câu hỏi kinh điển về phương pháp đo.
 4. Vì sao chọn dải đèn nháy 1–5 Hz (hay 2–4 Hz?) — dẫn tiêu chuẩn đèn ưu tiên 60–240 nháy/phút, chốt cùng số với quyển sau khi sửa A3/B3.
 5. Exposure time ảnh hưởng phép đo (3.5.6) — đây là điểm "đo lường" hay, nên chủ động đưa lên slide (đã có trong Slide 13).
+
+---
+
+## E. KẾ HOẠCH SỬA QUYỂN (đã chốt hướng: sửa quyển cho khớp thực tế)
+
+Thứ tự làm — sửa nội dung lớn trước, lỗi trình bày quét một lượt cuối cùng:
+
+### Bước 1 — Chốt bộ số chuẩn (30 phút, làm trước mọi thứ)
+Lập một "bảng số liệu chuẩn" dùng chung cho quyển + slide, lấy từ code làm gốc:
+- Dải lọc âm thanh: **500–1800 Hz** (`deploy/config.py`) — sửa tại 1.1.2, 2.3.1a, 2.3.2b (600–1500 → 500–1800), 3.2.2a + chú thích Hình 3-2 (bỏ cách gọi "dải lọc 300–3500", ghi rõ đó là dải Mel filter bank fmin/fmax).
+- Dải tần đèn nháy: **1–5 Hz** (`FFT_FREQ_MIN/MAX`) — định nghĩa Ω tại 2.6.5, sửa "2–4 Hz" ở 3.5.3.
+- Ngưỡng: PNR ≥ **5.0**, năng lượng màu ≥ **5.0**, voting **3/5**, cửa sổ **2 s / trượt 0,17 s**, YOLO chạy **mỗi 9 frame**, fs **22050 Hz** (sửa typo 22500 ở 2.3.2a).
+- Tên cảm biến ảnh: chốt theo phần cứng thật (schematic là **IMX415** → sửa "IMX678" ở tóm tắt, hoặc ngược lại nếu board thật dùng IMX678 — kiểm tra BOM).
+
+### Bước 2 — Bổ sung phần cứng camera CV25 (A1) — khối lượng lớn nhất
+- Thêm mục mới vào Chương 2 (đề xuất: **2.9. Thiết kế phần cứng camera** sau 2.8, hoặc thay hẳn 2.8.4):
+  - 2.9.1 Yêu cầu: điều khiển được exposure/gain (phục vụ phép đo FFT — nối thẳng với 3.5.6), ống kính zoom/focus/iris chỉnh từ xa, truyền frame ổn định qua Ethernet.
+  - 2.9.2 Thiết kế mạch: 5 sheet Altium (Nguồn, SoM CV25, Ethernet, giao tiếp cảm biến MIPI/I2C, điều khiển ống kính TMC) — chèn ảnh schematic/3D từ `hardware/CV25_Camera_DATN/`.
+  - 2.9.3 Firmware: GStreamer capture → JPEG → BGR 640×640 → TCP (header 4 byte + payload); UDP lệnh CALIB/ZOOM/FOCUS/IRIS (`camera_source/src/`).
+- **Viết lại 2.8.4** cho khớp: thay đoạn "đề tài không tập trung vào thiết kế cảm biến hình ảnh" bằng lý do tự thiết kế camera (chủ động tham số thu nhận ảnh phục vụ phép đo + làm chủ phần cứng).
+- Cập nhật: tóm tắt đầu quyển (thêm camera tự thiết kế vào danh mục phần cứng), 3.1.1 (cấu hình thực nghiệm), 4.1 (kết luận — thêm đóng góp phần cứng), 4.2 (hướng phát triển — thêm autofocus vòng kín nếu kịp cài đặt).
+
+### Bước 3 — Bổ sung lọc Butterworth zero-phase + PNR vào khối đèn (A2)
+- 2.6.3: sau đoạn xây dựng chuỗi R(t)/B(t), thêm bước **lọc thông dải Butterworth bậc 2, 1–5 Hz, zero-phase (lọc xuôi–ngược)** — nêu lý do: khử trôi nền (xe tiến lại gần/ra xa tạo bell curve như ID 104) và nhiễu rung bbox, không méo pha trước FFT.
+- 2.6.4: thêm cửa sổ Hann trước FFT (giảm rò rỉ phổ).
+- 3.5: thêm tiểu mục "Hiệu quả của bộ lọc" — chèn hình `docs/images/so_sanh_loc_id13.png` (+ id104, id115, emergency nếu cần), nêu số **PNR 5,97 → 27,84 (+366%), đỉnh 2,34 Hz**; ID 104 bị loại nhờ ngưỡng năng lượng màu.
+- Danh mục hình + mục lục cập nhật theo.
+
+### Bước 4 — Bổ sung cơ chế ra quyết định + đầu ra (A4)
+- 2.7.2: thay mô tả tuần tự 9 bước bằng (hoặc bổ sung) **máy trạng thái LISTENING → ALERT → CONFIRMED**, chu kỳ 0,5 s, timeout 30 s, cơ chế lùi CONFIRMED→ALERT — vẽ 1 hình state diagram (điểm cộng với hội đồng TĐH).
+- Thêm mục nhỏ "Đầu ra hệ thống": GPIO BCM17, MQTT JSON, lưu frame chú thích; và "Cơ chế vận hành bền vững": tự kết nối lại camera, giám sát nhiệt 75/80°C, log xoay vòng (lấy từ `deploy/decision/`).
+- 3.6 cập nhật tương ứng (quy trình hoạt động theo state machine).
+
+### Bước 5 — Điền số liệu thiếu Chương 3 (mục B)
+- 3.3: tính mAP50/mAP50-95, precision/recall từ `yolo26n_train_results.csv` (epoch cuối/best) → thêm bảng.
+- 3.4: đo ID switch/độ dài track trên `yolo26_track_*.mp4` (hoặc ít nhất mô tả định lượng 1 video).
+- 3.5: ghi giá trị ngưỡng T = 5.0, định nghĩa Ω = [1, 5] Hz.
+- 3.7: ghi rõ Pi 4 Model B Rev 1.5, RAM 4GB, 1,8GHz, backend TFLite INT8 (`benchmark_results.json`); cập nhật số sau khi benchmark lại BiLSTM INT8; thêm 1 câu về lượng tử hóa INT8 (quy trình + so sánh float32/INT8).
+- Bảng 3-3: bổ sung/giải thích khung 10h–11h; thêm 1 câu mô tả cách xác định ground truth 79 xe.
+- 4.1: thêm đoạn số liệu tổng hợp + bảng đối chiếu mục tiêu ↔ kết quả.
+
+### Bước 6 — Quét lỗi trình bày (toàn bộ mục C, 1 buổi)
+Checklist: `// Hình ảnh` (2.5.4) → chèn hình pipeline YOLO+ByteTrack; "Hình 3.xx" (3.6.1) → đánh số lại chuỗi hình sau 3-38; caption Hình 3-33; gộp/xóa khối lặp ở 3.2.1; sửa câu ngược nghĩa 2.6.5 (thêm "không yêu cầu cả hai kênh xuất hiện đồng thời"); typo (anh thanh, BiLTSM, 22500, đồ án nay, aquan trọng, nhấp nháu, RAM cầm); lời cảm ơn số nhiều; "Bảng 3.4"→"Bảng 3-3"; thời gian giao đề tài 2/2025→kiểm tra; mục lục (hai mục 1.1, thiếu 1.1.3/2.5.4) — đánh số lại tự động rồi rebuild TOC; rà toàn bộ trích dẫn (Deshmukh↔[8], hoàn thiện [14], bổ sung năm cho [3][4][8][9]); thống nhất tên đề tài ở Nhiệm vụ/1.1/4.1 theo bìa.
