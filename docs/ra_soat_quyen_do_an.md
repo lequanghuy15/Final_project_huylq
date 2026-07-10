@@ -140,7 +140,24 @@ Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (
 
 ### F2. Autofocus vòng kín — extremum seeking (đã note ở slide_outline, giữ nguyên kế hoạch)
 - Leo đồi trên phương sai Laplacian → lệnh `FOCUS:<n>`. Kết quả trình ra: đồ thị S(k) hội tụ theo số bước, thời gian hội tụ.
-- Đi cùng F1 thành **một mục "Điều khiển ống kính vòng kín" gồm 2 vòng**: iris (bám setpoint, PI) + focus (tìm cực trị) — một mục quyển rất "nặng ký" với hội đồng TĐH, phân biệt rõ 2 lớp bài toán điều khiển.
+- Đi cùng F1 thành **một mục "Điều khiển ống kính vòng kín" gồm 2 vòng**: iris (bám setpoint, PI) + focus (tìm cực trị) — phân biệt rõ 2 lớp bài toán điều khiển.
+
+### F1+F2 chi tiết lý thuyết (chuẩn bị cho slide backup B7 và hỏi đáp)
+**Vòng Iris — điều chỉnh bám giá trị đặt, CÓ hàm truyền xấp xỉ:**
+- Setpoint I_ref = mức sáng ROI cho PNR tốt nhất (chọn từ thực nghiệm 3.5.6 — giá trị đặt sinh ra từ kết quả đo của đồ án).
+- Đối tượng: motor bước (vị trí, tức thời so với chu kỳ frame) + quang học (đặc tính tĩnh phi tuyến I(u)) + **trễ vận chuyển d = 1–3 frame** (phơi sáng + ISP + TCP về Pi + UDP về board).
+- Tuyến tính hóa quanh điểm làm việc: ΔI ≈ K·Δu; **nhận dạng K và d bằng đáp ứng bậc thang** (+N bước iris → ghi I(t)).
+- Bộ điều khiển I (hoặc PI): G_hở(z) ≈ K·Ki/(z−1)·z^(−d) — chọn Ki theo dự trữ biên/pha, trễ d là yếu tố giới hạn. Bão hòa iris min/max → anti-windup. Chu kỳ trích mẫu = chu kỳ frame (67 ms @15FPS).
+- Kiểm chứng: đặc tính tĩnh I(u) + đáp ứng quá độ hệ kín khi che/rọi sáng (overshoot, thời gian xác lập).
+- Quy trình kể trước hội đồng: nhận dạng → tuyến tính hóa → thiết kế → kiểm chứng.
+
+**Vòng Focus — tìm cực trị, KHÔNG có setpoint thường & không có hàm truyền:**
+- Hàm mục tiêu S(p) đơn đỉnh quanh điểm nét, giá trị đỉnh không biết trước → không đặt được I_ref kiểu thường.
+- Câu trả lời khi bị hỏi "không có setpoint sao là vòng kín?": **giá trị đặt là gradient bằng 0** — quanh đỉnh S(p) ≈ S* − a(p−p*)², dS/dp = 0 tại điểm nét; bộ điều khiển ước lượng dấu gradient qua nhiễu loạn (perturb-and-observe) và lái về 0. Sai lệch = gradient ước lượng. Cùng nguyên lý **MPPT điện mặt trời**.
+- Phân tích: **hội tụ** (đơn đỉnh + bước dò đủ nhỏ), không phải ổn định Bode. Backlash motor → tiếp cận đỉnh từ một chiều sau CALIB; cảnh động làm S nhiễu → dò khi cảnh tĩnh/hysteresis.
+
+**Bảng so sánh 2 vòng (đưa nguyên lên slide backup B7):** lớp bài toán (điều chỉnh vs tự tối ưu) / giá trị đặt (I_ref vs dS/dp=0) / mô hình (tĩnh tuyến tính hóa + trễ vs bản đồ đơn đỉnh) / bộ điều khiển (PI+anti-windup vs leo đồi thô→tinh) / phân tích (dự trữ biên-pha vs hội tụ) / kiểm chứng (đáp ứng quá độ vs đồ thị S(k)).
+**Điểm chung đáng nói:** cả hai vòng khép **qua mạng** — trễ vòng = phơi sáng + TCP + xử lý + UDP; đo con số trễ cụ thể để nêu (chất đo lường).
 
 ### F3. Mục "Đánh giá độ không đảm bảo đo" cho phép đo tần số đèn (công sức thấp nhất, thuần đo lường)
 - Không cần phần cứng, chỉ phân tích + thí nghiệm nhỏ:
