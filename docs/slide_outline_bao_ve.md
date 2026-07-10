@@ -161,3 +161,19 @@ Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xu
 9. **Nhiệt độ, hoạt động 24/7 có ổn định không?** Giám sát thermal zone, ngưỡng 75/80 °C, log xoay vòng, tự kết nối lại camera.
 10. **Vì sao không dùng camera thương mại?** Chủ động điều khiển ống kính (zoom/focus/iris) phục vụ phép đo, làm chủ phần cứng, chi phí — và là khối lượng kỹ thuật của đồ án.
 11. **Lượng tử hóa INT8 làm giảm độ chính xác bao nhiêu?** Nêu số so sánh float32 ↔ INT8 trên tập test (chuẩn bị sẵn từ notebook quantize); đổi lại giảm kích thước ~4× và chạy được trên CPU Pi. Nếu hỏi sâu: BiLSTM từng khó quantize (toán tử hồi tiếp), đã giải quyết được nên không phải hạ xuống GRU.
+
+---
+
+## GHI CHÚ ĐANG TREO (việc cần chốt trước khi làm slide)
+
+### 1. Autofocus vòng kín theo phản hồi độ nét — ý tưởng điểm nhấn TĐH (chưa cài đặt)
+- **Bản chất**: motor focus + phản hồi là chỉ số độ nét ảnh (phương sai Laplacian / Tenengrad) = **điều khiển vòng kín**, cụ thể là **điều khiển tìm cực trị (extremum-seeking)** — không có setpoint, dò cực đại hàm độ nét bằng leo đồi thô→tinh. Ví dụ tương đồng để nói với hội đồng: **thuật toán MPPT trong điện mặt trời**.
+- Vòng khép qua mạng: frame TCP về Pi → tính độ nét → lệnh `FOCUS:<n>` UDP về board → motor → quang học → frame mới. Trễ vòng = framerate + trễ mạng.
+- Ý bảo vệ: đường cong độ nét đơn đỉnh → hội tụ; cảnh động gây nhiễu S → cần hysteresis/chạy khi cảnh tĩnh; backlash motor bước → CALIB + tiếp cận đỉnh từ một chiều.
+- **HIỆN TRẠNG: chưa có trong code** — firmware mới có lệnh FOCUS chỉnh tay (`camera_source/src/main.cpp:84`), toàn repo chưa có chỗ nào tính độ nét. **Chỉ đưa lên slide là "vòng kín" nếu đã cài đặt và demo được**, không thì trình bày là hướng phát triển. Việc cài đặt: script trên Pi tính variance-of-Laplacian trên ROI + hill-climbing + gửi UDP (hạ tầng có sẵn, khối lượng nhỏ) → vẽ đồ thị S(k) hội tụ theo số bước làm hình minh họa.
+
+### 2. Việc cần làm khác (đã ghi rải rác ở trên, gom lại)
+- Chạy lại `benchmark_pi.py` với model **BiLSTM INT8 mới** — số 71,6 ms là của GRU cũ, cần xác nhận vẫn < 170 ms.
+- Cập nhật README/notebook đang ghi "GRU" cho khớp tên CNN-BiLSTM-Attention (phòng hội đồng xem repo).
+- Điền số accuracy/mAP từ Chương 3 quyển báo cáo vào slide 11–12.
+- Chuẩn bị số so sánh float32 ↔ INT8 cho câu hỏi 11.
