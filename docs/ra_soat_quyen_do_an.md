@@ -121,4 +121,37 @@ Lập một "bảng số liệu chuẩn" dùng chung cho quyển + slide, lấy 
 - 4.1: thêm đoạn số liệu tổng hợp + bảng đối chiếu mục tiêu ↔ kết quả.
 
 ### Bước 6 — Quét lỗi trình bày (toàn bộ mục C, 1 buổi)
+*(nội dung checklist ở dưới)*
+
+---
+
+## F. BỔ SUNG MỚI ĐỂ TĂNG KHỐI LƯỢNG TĐH/ĐO LƯỜNG (chốt 10/07: muốn thêm "chất điều khiển")
+
+Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (đồ thị hội tụ, bảng số), không thêm cái chỉ vẽ sơ đồ. Xếp theo tỷ lệ hiệu quả/công sức:
+
+### F1. Vòng điều khiển khẩu độ P-Iris giữ điều kiện đo tối ưu ⭐ (khuyến nghị làm nhất)
+- **Ý tưởng**: quyển 3.5.6 đã phát hiện exposure/độ sáng ảnh hưởng trực tiếp biên độ tín hiệu nhấp nháy và PNR → **khép vòng chính phát hiện đó**: đo độ sáng trung bình ROI trên Pi → bộ điều khiển PI → lệnh `IRIS:<pos>` qua UDP (firmware đã có sẵn!) → giữ độ sáng ROI bám giá trị đặt.
+- **Chất TĐH**: đây là vòng kín **bám giá trị đặt kinh điển** (có setpoint, sai lệch e = I_ref − I_ROI, bộ PI, cơ cấu chấp hành động cơ bước P-Iris, đối tượng là quang học + ISP). Dễ bảo vệ hơn extremum-seeking, vẽ được sơ đồ khối chuẩn, đo được đáp ứng quá độ (overshoot, thời gian xác lập) khi thay đổi ánh sáng đột ngột.
+- **Câu chuyện đẹp**: "phát hiện tham số camera ảnh hưởng phép đo (3.5.6) → thiết kế vòng điều khiển duy trì điều kiện đo tối ưu" — kết quả nghiên cứu dẫn tới thiết kế điều khiển, đúng quy trình kỹ thuật.
+- **Khối lượng**: script Pi (~100 dòng) + thí nghiệm che/rọi sáng → đồ thị I_ROI(t) bám setpoint + đồ thị PNR trước/sau khi có vòng điều khiển. Cần board camera thật để demo, không có thì demo bằng webcam chỉnh exposure qua OpenCV (v4l2) làm bản mô phỏng.
+- **Vào quyển**: mục 2.9.4 (thiết kế) + 3.x (kết quả đáp ứng vòng kín).
+
+### F2. Autofocus vòng kín — extremum seeking (đã note ở slide_outline, giữ nguyên kế hoạch)
+- Leo đồi trên phương sai Laplacian → lệnh `FOCUS:<n>`. Kết quả trình ra: đồ thị S(k) hội tụ theo số bước, thời gian hội tụ.
+- Đi cùng F1 thành **một mục "Điều khiển ống kính vòng kín" gồm 2 vòng**: iris (bám setpoint, PI) + focus (tìm cực trị) — một mục quyển rất "nặng ký" với hội đồng TĐH, phân biệt rõ 2 lớp bài toán điều khiển.
+
+### F3. Mục "Đánh giá độ không đảm bảo đo" cho phép đo tần số đèn (công sức thấp nhất, thuần đo lường)
+- Không cần phần cứng, chỉ phân tích + thí nghiệm nhỏ:
+  - Độ phân giải tần số Δf = 1/T_cửa_sổ (5 s → 0,2 Hz); trade-off cửa sổ dài ↔ trễ phát hiện — khảo sát PNR theo độ dài cửa sổ (2/3/5/8 s).
+  - Ảnh hưởng **jitter chu kỳ khung hình** (lấy mẫu không đều) lên phổ: đo timestamp thực tế các frame, định lượng độ lệch đỉnh tần số; nêu giải pháp nội suy lại về lưới thời gian đều.
+  - Ảnh hưởng khoảng cách/kích thước ROI lên SNR của tín hiệu màu.
+- **Vào quyển**: tiểu mục mới trong 3.5 (ví dụ 3.5.8 "Đánh giá độ không đảm bảo của phép đo tần số"). Hội đồng đo lường gần như chắc chắn hỏi mấy câu này — chủ động viết trước là chuyển câu hỏi khó thành điểm cộng.
+
+### F4. (Tùy chọn, chỉ khi dư thời gian) Ước lượng vận tốc xe từ dịch tần Doppler của còi
+- Bám tần số cơ bản của còi theo thời gian → độ dịch Doppler → ước lượng vận tốc tiếp cận và thời điểm xe ngang qua. Phép đo vật lý đẹp nhưng cần bản ghi âm chất lượng + xe chuyển động chuẩn; rủi ro cao, chỉ làm dạng phân tích offline minh họa.
+
+### F5. (Viết thêm 1 đoạn, gần như 0 công sức) Điều tiết tải theo nhiệt — vòng điều khiển on/off có trễ
+- Code đã có ngưỡng 75/80°C → trình bày lại trong quyển như bộ điều khiển on/off có hysteresis điều tiết tần suất suy diễn YOLO theo nhiệt độ CPU (đối tượng nhiệt, cảm biến thermal zone, cơ cấu "chấp hành" là lịch suy diễn). Thêm 1 đồ thị nhiệt độ khi chạy dài.
+
+**Khuyến nghị gói bổ sung**: F1 + F2 (gộp thành mục "Điều khiển ống kính vòng kín") + F3 + F5. Tổng khối lượng mới ≈ 1 mục thiết kế + 2 tiểu mục kết quả — đủ "dày" mà mọi thứ đều demo/đo được. F4 để dành làm "hướng phát triển".
 Checklist: `// Hình ảnh` (2.5.4) → chèn hình pipeline YOLO+ByteTrack; "Hình 3.xx" (3.6.1) → đánh số lại chuỗi hình sau 3-38; caption Hình 3-33; gộp/xóa khối lặp ở 3.2.1; sửa câu ngược nghĩa 2.6.5 (thêm "không yêu cầu cả hai kênh xuất hiện đồng thời"); typo (anh thanh, BiLTSM, 22500, đồ án nay, aquan trọng, nhấp nháu, RAM cầm); lời cảm ơn số nhiều; "Bảng 3.4"→"Bảng 3-3"; thời gian giao đề tài 2/2025→kiểm tra; mục lục (hai mục 1.1, thiếu 1.1.3/2.5.4) — đánh số lại tự động rồi rebuild TOC; rà toàn bộ trích dẫn (Deshmukh↔[8], hoàn thiện [14], bổ sung năm cho [3][4][8][9]); thống nhất tên đề tài ở Nhiệm vụ/1.1/4.1 theo bìa.
