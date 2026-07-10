@@ -20,7 +20,7 @@ Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xu
 - Ít chữ, dùng **từ khóa** + sơ đồ khối/biểu đồ; mỗi slide 1 thông điệp.
 - Slide sẽ **photo đen trắng 4 bản** → biểu đồ phải phân biệt được khi mất màu: dùng nét liền/đứt/chấm, marker khác nhau, không chỉ dựa vào màu; chữ trong hình ≥ cỡ 18.
 - Chuẩn bị sẵn **video demo + phần mềm mô phỏng** để chiếu khi hội đồng yêu cầu (đã có `Xeuutien.mp4`, `Stable_light.mp4`, các video track YOLO).
-- Đến sớm 30 phút thử máy chiếu; thống nhất tên mô hình còi hú dùng trong slide **đúng với quyển báo cáo** (quyển dùng CNN-BiLSTM-Attention ở phần lý thuyết — slide và miệng nói phải khớp quyển, tránh bị hỏi vặn vì lệch tên).
+- Đến sớm 30 phút thử máy chiếu; mô hình còi hú gọi thống nhất là **CNN-BiLSTM-Attention (INT8)** trong toàn bộ slide — khớp với quyển báo cáo. (Trước đây phải thay bằng GRU vì lỗi lượng tử hóa, nay đã quantize được BiLSTM trực tiếp; lưu ý cập nhật README/notebook trong repo cho khớp nếu hội đồng xem mã nguồn.)
 
 ---
 
@@ -60,7 +60,7 @@ Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xu
 - Firmware C++: GStreamer bắt JPEG → BGR 640×640 → TCP về Pi (header 4 byte + payload); lệnh UDP CALIB/ZOOM/FOCUS/IRIS chỉnh ống kính từ xa.
 
 ### Slide 7 — Kênh đo 1: Âm thanh còi hú (vẽ thành chuỗi xử lý tín hiệu)
-- Chuỗi đo: Mic (fs = 22 050 Hz) → ring buffer, cửa sổ 2 s trượt 170 ms → **lọc thông dải Butterworth bậc 4, 500–1 800 Hz** (dải tần đặc trưng còi) → pre-emphasis 0,97 → **Mel(64) + MFCC(40)** → khối phân loại INT8 (~5,5 MB) → xác suất còi.
+- Chuỗi đo: Mic (fs = 22 050 Hz) → ring buffer, cửa sổ 2 s trượt 170 ms → **lọc thông dải Butterworth bậc 4, 500–1 800 Hz** (dải tần đặc trưng còi) → pre-emphasis 0,97 → **Mel(64) + MFCC(40)** → khối phân loại **CNN-BiLSTM-Attention INT8** (ghi đúng kích thước file .tflite hiện tại) → xác suất còi.
 - **Voting 3/5 cửa sổ** để chống nhiễu giật cục → tín hiệu `siren_active` ổn định.
 - Nói miệng: chọn fs, dải lọc, cửa sổ trượt là các quyết định đo lường — chuẩn bị trả lời "vì sao 22 050 Hz / vì sao 500–1 800 Hz" (Nyquist, phổ còi hú).
 
@@ -127,7 +127,7 @@ Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xu
 ## SLIDE DỰ PHÒNG (BACKUP — sau slide cảm ơn, chỉ mở khi bị hỏi)
 
 - B1. Tập dữ liệu: cấu trúc dataset âm thanh (positive/negative, train/val/test) và ảnh (7 lớp, ~320 MB), cách thu và gán nhãn.
-- B2. Đường cong huấn luyện 2 mô hình (loss/mAP theo epoch) + lý do chọn/lượng tử hóa INT8 (giảm kích thước, chạy CPU Pi).
+- B2. Đường cong huấn luyện 2 mô hình (loss/mAP theo epoch) + lý do chọn/lượng tử hóa INT8 (giảm kích thước, chạy CPU Pi). Ghi chú quá trình: lượng tử hóa BiLSTM từng lỗi (toán tử LSTM/attention khó quantize trong TFLite) → giai đoạn đầu dùng GRU thay thế, sau đã khắc phục và quantize trực tiếp CNN-BiLSTM-Attention — câu chuyện tốt nếu bị hỏi "vì sao chọn kiến trúc này".
 - B3. Toán bộ lọc: đáp ứng biên-pha Butterworth, vì sao zero-phase (filtfilt) — không méo pha tín hiệu nhấp nháy; chọn bậc lọc.
 - B4. Chi tiết ByteTrack: vector trạng thái Kalman 8 chiều, ghép cặp 2 tầng theo IoU.
 - B5. Giao thức truyền camera→Pi: khung TCP header 4 byte + 1 228 800 byte BGR, zero-copy phía Pi; lệnh UDP điều khiển ống kính.
@@ -160,3 +160,4 @@ Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xu
 8. **Đầu ra ghép với tủ đèn tín hiệu thế nào?** GPIO relay khô + MQTT; hướng phát triển: chuẩn công nghiệp (Modbus/NTCIP).
 9. **Nhiệt độ, hoạt động 24/7 có ổn định không?** Giám sát thermal zone, ngưỡng 75/80 °C, log xoay vòng, tự kết nối lại camera.
 10. **Vì sao không dùng camera thương mại?** Chủ động điều khiển ống kính (zoom/focus/iris) phục vụ phép đo, làm chủ phần cứng, chi phí — và là khối lượng kỹ thuật của đồ án.
+11. **Lượng tử hóa INT8 làm giảm độ chính xác bao nhiêu?** Nêu số so sánh float32 ↔ INT8 trên tập test (chuẩn bị sẵn từ notebook quantize); đổi lại giảm kích thước ~4× và chạy được trên CPU Pi. Nếu hỏi sâu: BiLSTM từng khó quantize (toán tử hồi tiếp), đã giải quyết được nên không phải hạ xuống GRU.
