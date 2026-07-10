@@ -1,179 +1,170 @@
-# SƯỜN SLIDE BẢO VỆ ĐỒ ÁN TỐT NGHIỆP
+# SƯỜN SLIDE BẢO VỆ ĐỒ ÁN TỐT NGHIỆP (v2 — thân bài bám quyển, mở rộng tách riêng)
 
 **Đề tài:** Thiết kế hệ thống nhận diện xe ưu tiên tại biên sử dụng đa cảm biến phục vụ điều khiển giao thông thông minh
 **SV:** Lê Quang Huy — 20222297 | **GVHD:** TS. Lê Minh Hoàng, PGS.TS. Nguyễn Thanh Hường
 
 ---
 
-## Định hướng chung (đọc trước khi làm slide)
+## Chiến lược trình bày (chốt 10/07)
 
-Hội đồng là hội đồng **Tự động hóa** → khung câu chuyện xuyên suốt là:
-
-> **"Thiết kế một hệ ĐO đa cảm biến hoạt động 24/7 trên thiết bị nhúng: thu nhận tín hiệu → lọc/trích xuất đặc trưng → đo đại lượng có ích (xác suất còi, tần số nhấp nháy đèn, PNR) → hợp nhất bằng chứng → ra quyết định điều khiển (GPIO/MQTT)."**
-
-- YOLO và mô hình phân loại còi chỉ là **một khối trong chuỗi đo** — mỗi mô hình tối đa 1 slide, nói về **vai trò, đầu vào/đầu ra, chi phí tài nguyên đã đo được**, KHÔNG đi sâu kiến trúc mạng.
-- Trọng tâm "khoe": (1) chuỗi xử lý tín hiệu âm thanh (lấy mẫu → lọc thông dải → Mel/MFCC), (2) phép đo tần số đèn bằng lọc Butterworth zero-phase + FFT + chỉ số PNR, (3) logic hợp nhất 3 bằng chứng độc lập (máy trạng thái), (4) thiết kế phần cứng camera (Altium, CV25, điều khiển ống kính), (5) số liệu đo đạc thực trên Pi 4.
-- Thời lượng trình bày cá nhân: **10–15 phút → 15–17 slide nội dung** (≈45–50 giây/slide), không kể bìa và backup.
+1. **Thân bài (slide 3–14) bám đúng quyển báo cáo** — mọi phương pháp, con số, hình vẽ đều truy được về mục/hình trong quyển. Hội đồng cầm quyển đối chiếu không lệch chỗ nào.
+2. **Phần cứng camera CV25 + các cải tiến trong code (Butterworth zero-phase, máy trạng thái, GPIO/MQTT) + điều khiển ống kính vòng kín → gom vào mục "Triển khai mở rộng sau đồ án"** (slide 15–16), trình bày với tinh thần: *"nộp quyển không có nghĩa là dừng nghiên cứu — sau khi hoàn thành đồ án em tiếp tục phát triển hệ thống"*. Đây vừa là điểm cộng thái độ nghiên cứu, vừa chạm tiêu chí điểm thành tích ("sản phẩm ứng dụng có tính hoàn thiện cao, khối lượng thực hiện lớn").
+3. Khung câu chuyện cho hội đồng TĐH giữ nguyên: **hệ đo đa cảm biến** — thu tín hiệu → lọc/trích đặc trưng → đo đại lượng có ích → hợp nhất bằng chứng → kết luận. Mô hình học sâu chỉ là khối phân loại trong chuỗi đo, không sa đà kiến trúc mạng.
+4. Nếu hội đồng xem repo/demo thấy code "đi trước" quyển → câu trả lời nhất quán: các cải tiến đó thực hiện sau khi nộp quyển, đã trình bày ở phần mở rộng.
 
 **Quy tắc trình bày (bám tiêu chí chấm 1,5đ chất lượng slide):**
-- **Đánh số trang mọi slide** (tiêu chí chấm ghi rõ; hội đồng hỏi "quay lại slide số N").
-- Ít chữ, dùng **từ khóa** + sơ đồ khối/biểu đồ; mỗi slide 1 thông điệp.
-- Slide sẽ **photo đen trắng 4 bản** → biểu đồ phải phân biệt được khi mất màu: dùng nét liền/đứt/chấm, marker khác nhau, không chỉ dựa vào màu; chữ trong hình ≥ cỡ 18.
-- Chuẩn bị sẵn **video demo + phần mềm mô phỏng** để chiếu khi hội đồng yêu cầu (đã có `Xeuutien.mp4`, `Stable_light.mp4`, các video track YOLO).
-- Đến sớm 30 phút thử máy chiếu; mô hình còi hú gọi thống nhất là **CNN-BiLSTM-Attention (INT8)** trong toàn bộ slide — khớp với quyển báo cáo. (Trước đây phải thay bằng GRU vì lỗi lượng tử hóa, nay đã quantize được BiLSTM trực tiếp; lưu ý cập nhật README/notebook trong repo cho khớp nếu hội đồng xem mã nguồn.)
+- **Đánh số trang mọi slide**; ít chữ, từ khóa + sơ đồ/biểu đồ; mỗi slide 1 thông điệp.
+- Slide photo **đen trắng 4 bản** → biểu đồ phân biệt bằng nét liền/đứt + marker, không chỉ bằng màu; chữ trong hình ≥ 18pt.
+- Chuẩn bị video demo + phần mềm mô phỏng sẵn sàng chiếu (Xeuutien.mp4, Stable_light.mp4, các video track).
+- Đến sớm 30 phút thử máy. Tên mô hình còi: **CNN-BiLSTM-Attention** thống nhất mọi chỗ.
 
 ---
 
 ## PHẦN MỞ ĐẦU (≈2 phút)
 
 ### Slide 1 — Trang bìa
-- Tên trường/khoa, logo; tên đề tài; SV + MSSV; GVHD; hội đồng số; ngày bảo vệ.
+- Tên trường/khoa, đề tài (đúng tên trên bìa quyển), SV + MSSV, GVHD, hội đồng, ngày.
 
 ### Slide 2 — Nội dung trình bày
-- 5 mục: Đặt vấn đề & mục tiêu → Thiết kế hệ thống → Thiết kế các kênh đo → Kết quả thực nghiệm & đánh giá → Kết luận & hướng phát triển.
+- 6 mục: Đặt vấn đề & mục tiêu → Thiết kế hệ thống → Kết quả thực nghiệm → Kết luận → Triển khai mở rộng sau đồ án → Hướng phát triển.
 
-### Slide 3 — Đặt vấn đề & tính cấp thiết
-- Ùn tắc đô thị → xe cứu thương/cứu hỏa/công an khó lưu thông; nhận biết hiện nay phụ thuộc con người.
-- ITS cần **tự động phát hiện xe ưu tiên tại nút giao** để điều chỉnh pha đèn.
-- Các hướng hiện có và hạn chế (1 bảng mini): GPS/RFID/V2X — cần hạ tầng, chi phí; chỉ camera — che khuất, nhiễu sáng; chỉ âm thanh — nhiễu ồn, không định vị.
-- → Kết luận dẫn dắt: cần **hệ đo đa cảm biến tại biên**, giá rẻ, luôn hoạt động.
+### Slide 3 — Đặt vấn đề & tính cấp thiết (quyển 1.1, 1.1.3)
+- Ùn tắc đô thị → xe ưu tiên khó lưu thông; nhận biết hiện phụ thuộc con người/CSGT điều tiết thủ công.
+- Bảng mini các hướng hiện có: V2X/GPS/RFID — chi phí hạ tầng lớn, khó đồng bộ ở VN; chỉ camera — che khuất; chỉ âm thanh — nhiễu, không định vị.
+- → Giải pháp: **hệ đo đa cảm biến tại biên**, tận dụng hạ tầng camera sẵn có + module thu âm giá rẻ.
 
-### Slide 4 — Mục tiêu & phạm vi (viết dạng chỉ tiêu ĐO ĐƯỢC — sẽ đối chiếu lại ở slide kết luận)
-- Phát hiện xe ưu tiên bằng **3 bằng chứng độc lập**: còi hú + hiện diện phương tiện + tần số nhấp nháy đèn 1–5 Hz.
-- Chạy 24/7 trên Raspberry Pi 4 (không GPU): RAM < 200 MB, luôn-lắng-nghe chỉ tốn ~5% CPU.
-- Chu kỳ ra quyết định 0,5 s; cảnh báo qua GPIO/MQTT cho hệ điều khiển đèn.
-- Tự thiết kế phần cứng camera (mạch + firmware) thay vì mua camera thương mại.
-- Phạm vi: nút giao đơn, điều kiện ngày/đêm, một camera + một microphone.
+### Slide 4 — Mục tiêu & phạm vi (quyển 2.1 — viết dạng chỉ tiêu đo được, slide kết luận sẽ tick lại)
+- Nhận diện xe ưu tiên bằng **3 bằng chứng độc lập**: còi hú + phương tiện hiện diện + đèn nhấp nháy tuần hoàn.
+- Chạy liên tục trên thiết bị biên (Raspberry Pi), không phụ thuộc cloud; khối thị giác chỉ kích hoạt khi có còi (tiết kiệm tài nguyên).
+- Chống báo động giả trong môi trường nhiễu giao thông thực tế.
+- Phạm vi: một nút giao, 1 mic + 1 camera.
 
 ---
 
-## PHẦN THIẾT KẾ (≈5 phút)
+## PHẦN THIẾT KẾ (≈4,5 phút — theo Chương 2 của quyển)
 
-### Slide 5 — Kiến trúc hệ thống tổng thể (1 sơ đồ khối lớn, slide "xương sống")
-- Sơ đồ: [Mic INMP441] + [Camera CV25 tự thiết kế] → Pi 4 → 2 chuỗi đo (âm thanh / quang) → Khối hợp nhất & máy trạng thái → GPIO + MQTT + ảnh lưu trữ.
-- Nhấn nguyên tắc **always-on tiết kiệm năng lượng**: chỉ mic chạy liên tục; kênh hình ảnh chỉ được "đánh thức" khi kênh âm thanh xác thực có còi.
-- Nói miệng: đây là bài toán thiết kế hệ đo + logic điều khiển, mô hình học máy chỉ là 2 khối con.
+### Slide 5 — Kiến trúc tổng thể (Hình 2-1/2-7 quyển)
+- Sơ đồ khối: [Mic] luôn hoạt động → phát hiện còi → kích hoạt [Camera → YOLO26n → ByteTrack → FFT] → hợp nhất 3 điều kiện → kết luận.
+- Nhấn nguyên tắc **kích hoạt theo sự kiện**: mic luôn nghe với tải thấp nhất, thị giác chỉ chạy khi có bằng chứng âm thanh.
 
-### Slide 6 — Thiết kế phần cứng camera (thế mạnh với hội đồng TĐH — dành đủ thời gian)
-- Ảnh 3D/ảnh thật board + sơ đồ 5 khối schematic (Altium): Nguồn — SoM CV25 — Ethernet — Giao tiếp cảm biến ảnh (MIPI/I2C) — Điều khiển ống kính.
-- Cảm biến ảnh Sony (IMX415/IMX678 — ghi đúng theo quyển), ống kính varifocal: động cơ bước zoom/focus/P-Iris qua driver TMC.
-- Firmware C++: GStreamer bắt JPEG → BGR 640×640 → TCP về Pi (header 4 byte + payload); lệnh UDP CALIB/ZOOM/FOCUS/IRIS chỉnh ống kính từ xa.
+### Slide 6 — Kênh đo âm thanh (quyển 2.3)
+- Chuỗi xử lý tín hiệu: fs 22 050 Hz, mono → **lọc thông dải Butterworth** (dải tần đặc trưng còi — ghi đúng số sau khi chốt bước 1 kế hoạch sửa quyển) → cửa sổ 2 s trượt 0,17 s → pre-emphasis 0,97 → **Mel(64, 300–3500 Hz) + MFCC(40)** song song.
+- Phân loại: **Dual-Stream CNN-BiLSTM-Attention** (2 nhánh đặc trưng, BiLSTM khai thác tính chuỗi, Attention tập trung vùng chứa còi) — 1 hình kiến trúc, không đi sâu.
+- **Voting 3/5 cửa sổ** chống báo giả → tín hiệu kích hoạt ổn định.
+- Nói miệng: các lựa chọn fs/dải lọc/cửa sổ là quyết định đo lường (Nyquist, phổ còi 500–1800 Hz, chu kỳ WAIL/YELP/HI-LO).
 
-### Slide 7 — Kênh đo 1: Âm thanh còi hú (vẽ thành chuỗi xử lý tín hiệu)
-- Chuỗi đo: Mic (fs = 22 050 Hz) → ring buffer, cửa sổ 2 s trượt 170 ms → **lọc thông dải Butterworth bậc 4, 500–1 800 Hz** (dải tần đặc trưng còi) → pre-emphasis 0,97 → **Mel(64) + MFCC(40)** → khối phân loại **CNN-BiLSTM-Attention INT8** (ghi đúng kích thước file .tflite hiện tại) → xác suất còi.
-- **Voting 3/5 cửa sổ** để chống nhiễu giật cục → tín hiệu `siren_active` ổn định.
-- Nói miệng: chọn fs, dải lọc, cửa sổ trượt là các quyết định đo lường — chuẩn bị trả lời "vì sao 22 050 Hz / vì sao 500–1 800 Hz" (Nyquist, phổ còi hú).
+### Slide 7 — Khối phát hiện & bám vết phương tiện (quyển 2.4–2.5, 1 slide duy nhất cho "AI thị giác")
+- Vai trò: cung cấp **ROI ổn định theo từng xe** cho phép đo quang — YOLO không phân loại "xe ưu tiên", chỉ phát hiện 7 lớp phương tiện.
+- YOLO26n (nano, tối ưu biên, NMS-free); suy luận chậm hơn framerate → **ByteTrack + Kalman** duy trì vị trí và ID giữa các lần suy luận, ghép cặp 2 tầng tận dụng cả detection tin cậy thấp (giữ track qua che khuất).
 
-### Slide 8 — Kênh đo 2: Hiện diện & bám vết phương tiện (1 slide duy nhất cho phần "AI thị giác")
-- Vai trò trong hệ đo: cung cấp **vùng quan tâm (ROI) ổn định theo từng xe** để đo tín hiệu đèn.
-- Phát hiện: YOLO26n INT8 (2,7 MB) chạy **mỗi 9 khung hình**; giữa các lần chạy dùng **dự báo Kalman** để duy trì vị trí → tiết kiệm tài nguyên.
-- Bám vết: ByteTrack rút gọn (Kalman 8 trạng thái + ghép cặp Hungarian 2 tầng) → mỗi xe một ID ổn định qua che khuất.
-- KHÔNG trình bày kiến trúc mạng; chỉ nêu: 7 lớp phương tiện, kết quả huấn luyện để ở backup.
+### Slide 8 — Khối xác thực đèn ưu tiên bằng FFT (quyển 2.6 — trọng tâm phương pháp)
+- Xây tín hiệu đo: ROI theo từng ID → cường độ trung bình kênh Đỏ R(t) và Xanh dương B(t) theo thời gian.
+- Loại DC → **FFT** → tìm đỉnh phổ trong dải tần đèn nháy Ω → **tỷ số đỉnh/trung vị nền phổ** (chuẩn hóa theo nhiễu nền, không dùng ngưỡng biên độ tuyệt đối — lý do: cường độ phụ thuộc khoảng cách/ánh sáng/exposure).
+- Tiêu chí: ρ_R ≥ T **hoặc** ρ_B ≥ T (xe chỉ đèn đỏ, chỉ đèn xanh, hoặc cả hai).
+- Hình: đồ thị R(t)/B(t) + phổ FFT của xe ưu tiên (Hình 3-36/3-37 quyển).
 
-### Slide 9 — Kênh đo 3: Đo tần số nhấp nháy đèn ưu tiên (slide TRỌNG TÂM của đồ án)
-- Xây dựng tín hiệu đo: crop ROI theo từng ID → HSV → **năng lượng màu đỏ (2 dải hue) + xanh dương** theo thời gian → chuỗi tín hiệu 1 chiều/xe (cửa sổ 5 s).
-- Xử lý: **Butterworth thông dải 1–5 Hz, bậc 2, lọc zero-phase (filtfilt)** — triệt nhiễu rung bbox và trôi nền mà không méo pha → cửa sổ Hann → **FFT** → đỉnh phổ.
-- Đại lượng đo: **tần số đỉnh f_peak** và **PNR = biên độ đỉnh / trung vị nhiễu nền**.
-- Tiêu chí kết luận "đèn ưu tiên": năng lượng màu ≥ ngưỡng **VÀ** PNR ≥ 5 **VÀ** f_peak ∈ [1; 5] Hz.
-- Hình: tín hiệu trước/sau lọc + phổ FFT (`so_sanh_loc_id13.png`).
-
-### Slide 10 — Hợp nhất bằng chứng & ra quyết định (ngôn ngữ điều khiển — hội đồng TĐH thích)
-- **Máy trạng thái 3 trạng thái, chu kỳ 0,5 s**: LISTENING (chỉ mic) → ALERT (có còi → bật camera + kênh quang) → CONFIRMED (còi + xe + đèn đúng tần số).
-- Cơ chế lùi trạng thái: mất đèn/còi tạm thời chỉ lùi CONFIRMED→ALERT; 30 s không còi → về LISTENING (tắt camera, tiết kiệm năng lượng).
-- Đầu ra chấp hành: GPIO BCM17 (relay/tủ đèn), bản tin MQTT JSON (timestamp, ID xe, f_peak, PNR), ảnh chú thích lưu log.
-- Tính bền vững vận hành: tự kết nối lại camera (backoff mũ), giám sát nhiệt CPU (cảnh báo 75 °C, giảm tải 80 °C), log xoay vòng.
+### Slide 9 — Tích hợp & ra quyết định + lựa chọn phần cứng (quyển 2.7–2.8)
+- Điều kiện kết luận: **Siren ∧ Vehicle ∧ FlashingLight** — 3 bằng chứng độc lập, giảm báo giả so với đơn cảm biến.
+- Lựa chọn phần cứng theo ước lượng tài nguyên (điểm TĐH): STM32 bị loại (YOLO cần ~14 MB RAM + thư viện Python) → **Raspberry Pi 4**; mic MEMS **INMP441** (I2S, ADC tích hợp); camera RGB điều chỉnh được exposure/AWB (phục vụ phép đo — dẫn trước cho slide 12).
 
 ---
 
-## PHẦN KẾT QUẢ THỰC NGHIỆM (≈4–5 phút — tiêu chí 4 điểm nằm ở đây, mỗi kết quả gắn với con số đo được)
+## PHẦN KẾT QUẢ (≈4,5 phút — theo Chương 3, mỗi kết quả một con số)
 
-### Slide 11 — Kết quả kênh âm thanh
-- Kết quả huấn luyện/đánh giá trên tập dữ liệu còi (accuracy/precision/recall — lấy số từ Chương 3 quyển báo cáo).
-- Đánh giá điều kiện thực tế: nhiễu giao thông, còi xa/gần (mục 3.2.5).
-- Số liệu thời gian thực: suy diễn 71,6 ms < chu kỳ trượt 170 ms → đáp ứng thời gian thực với biên an toàn ~2,4×.
-- Hình: mel-spectrogram còi hú (`mel_spectrogram_siren.png`), đường loss/accuracy để backup.
+### Slide 10 — Kết quả kênh âm thanh: mô hình (quyển 3.2.4)
+- Test 6 381 mẫu: **Precision/Recall/F1 ≈ 0,98–0,99** cả hai lớp, accuracy ~99%, **ROC-AUC 0,9982**.
+- Hình: ma trận nhầm lẫn + đường PR (Hình 3-19, 3-21); loss/accuracy hội tụ để backup.
+- Nhấn: nhầm Non-Siren→Siren thấp = ít kích hoạt thị giác vô ích (tiết kiệm tài nguyên).
 
-### Slide 12 — Kết quả kênh hình ảnh
-- mAP/precision theo lớp trên ảnh thực tế (số từ mục 3.3, `yolo26n_train_results.csv`); ảnh khung hình có bbox + ID track.
-- Bám vết qua che khuất: minh họa chuỗi frame track ID ổn định (cắt từ `yolo26_track_*.mp4`).
-- Nhấn: suy diễn 599,7 ms/lần nhưng nhờ cơ chế "1 lần YOLO / 9 khung + Kalman" pipeline vẫn chạy thời gian thực.
+### Slide 11 — Kết quả kênh âm thanh: thực địa (quyển 3.2.5 — slide "thực chiến", hội đồng thích)
+- Triển khai thật 15–26/06/2026 tại Hà Đông: **76/79 xe ưu tiên phát hiện đúng (96,2%)**, 3 bỏ sót (giờ cao điểm), 8 báo giả (còi hơi) — bảng theo khung giờ (Bảng 3-3).
+- Hiệu quả Voting: trước/sau (Hình 3-26) — loại dự đoán giật cục.
+- Chuẩn bị miệng: cách xác định ground truth 79 xe (hội đồng đo lường chắc chắn hỏi).
 
-### Slide 13 — Kết quả phép đo tần số đèn (slide kết quả đắt giá nhất — nói chậm)
-- Bảng/hình 3 trường hợp đối chứng (mục 3.5): nguồn sáng không nhấp nháy → loại; xe thường ID 104 → loại nhờ ngưỡng năng lượng màu (dù PNR giả cao do rung); xe ưu tiên ID 13 → xác nhận, **f_peak = 2,34 Hz**.
-- Hiệu quả bộ lọc zero-phase: **PNR 5,97 → 27,84 (+366 %)** so với chỉ detrend — đây là đóng góp xử lý tín hiệu chính, so sánh "trước/sau" ngay trên slide.
-- Ảnh hưởng tham số camera (exposure — mục 3.5.6): phép đo vẫn bền vững (video `yolo26_exposure_sim_id13.mp4` để demo).
+### Slide 12 — Kết quả khối thị giác + FFT (quyển 3.3–3.5 — slide kết quả đắt nhất, nói chậm)
+- YOLO + ByteTrack: phát hiện đa đối tượng, ID ổn định (Hình 3-27, 3-28; thêm mAP từ CSV nếu kịp bổ sung quyển).
+- **3 trường hợp đối chứng FFT**: nguồn sáng tĩnh → phổ bẹt; xe thường ID 104 → bell curve trơn, đỉnh 1,05 Hz (chuyển động của xe, không phải đèn) → loại; xe ưu tiên → dao động bật/tắt rõ, đỉnh phổ nổi bật trong dải đèn → xác nhận.
+- **Ảnh hưởng exposure time** (3.5.6): giảm exposure hợp lý → biên độ nhấp nháy giữ tốt hơn, tín hiệu sạch hơn — phát hiện "đo lường" đắt giá, dẫn trước cho phần mở rộng (vòng điều khiển iris).
 
-### Slide 14 — Kết quả hệ thống tích hợp & tài nguyên trên Pi 4
-- Bảng benchmark (đo thực bằng `benchmark_pi.py`): RAM tổng ~164,5 MB; YOLO 599,7 ms; Siren 71,6 ms; ByteTrack 0,13–1,28 ms; HSV+FFT ~1,2 ms/track; decode 10,7 ms.
-- Kết luận thời gian thực: nút thắt duy nhất là YOLO, đã xử lý bằng lịch suy diễn thưa; luôn-lắng-nghe ~5% CPU, ~40 MB.
-- Ảnh chụp hệ thống chạy thật + frame CONFIRMED có nhãn "XE UU TIEN ID".
-- (Nếu có) demo trực tiếp/video toàn trình: còi vang → ALERT → xe vào khung → CONFIRMED → GPIO sáng.
+### Slide 13 — Kết quả tài nguyên & thời gian thực (quyển 3.7)
+- Bảng: CNN-BiLSTM-Attention 61,8 MB / 71,6 ms mỗi cửa sổ 2 s; YOLO26n 45,2 MB / 599,7 ms (~1,67 FPS); ByteTrack 0,51 ms; FFT 1,23 ms; **tổng ~164,5 MB**.
+- Biện luận: nút thắt duy nhất là YOLO → giải bằng ByteTrack duy trì ROI giữa các lần suy luận + kích hoạt theo sự kiện → hệ chạy ổn định trên Pi, camera 15 FPS.
+
+### Slide 14 — Kết luận (quyển Chương 4 + bảng đối chiếu)
+- Bảng mục tiêu (Slide 4) ↔ kết quả, tick ✓ từng dòng: 3 bằng chứng ✓ (99% test / 96,2% thực địa / FFT phân biệt đúng 3 trường hợp), chạy trên Pi ✓ (164,5 MB), chống báo giả ✓ (voting + AND 3 điều kiện).
+- Hạn chế nói thẳng (quyển 3.8): phụ thuộc khoảng cách mic, điều kiện sáng/tham số camera, tốc độ suy luận YOLO.
 
 ---
 
-## PHẦN KẾT LUẬN (≈1,5 phút)
+## PHẦN MỞ RỘNG SAU ĐỒ ÁN (≈2 phút — điểm nhấn "không dừng nghiên cứu")
 
-### Slide 15 — Kết luận: đối chiếu mục tiêu ↔ kết quả (bảng 2 cột, tick ✓)
-- Mục tiêu ở Slide 4 từng dòng ↔ con số đạt được (3 bằng chứng ✓, RAM 164,5 MB < 200 MB ✓, chu kỳ 0,5 s ✓, phần cứng tự thiết kế ✓...).
-- Đóng góp chính (3 gạch đầu dòng): (1) phương pháp đo tần số đèn ưu tiên bằng lọc zero-phase + FFT với chỉ số PNR (+366 %); (2) kiến trúc đa cảm biến luôn-lắng-nghe tiết kiệm năng lượng trên thiết bị nhúng; (3) tự thiết kế hoàn chỉnh phần cứng + firmware camera.
-- Hạn chế (nói thẳng 1–2 ý, hội đồng đánh giá cao sự trung thực): mới thử nghiệm ở quy mô 1 nút giao/dữ liệu tự thu; YOLO ~0,6 s/lần suy diễn.
+> Mở màn bằng 1 câu định vị: *"Sau khi hoàn thành quyển báo cáo, em tiếp tục phát triển hệ thống theo hướng hoàn thiện sản phẩm — xin trình bày các kết quả đã và đang triển khai."*
 
-### Slide 16 — Hướng phát triển & Lời cảm ơn
-- Kết nối trực tiếp tủ điều khiển đèn tín hiệu (chuẩn công nghiệp), thử nghiệm đa nút giao, ước lượng hướng/khoảng cách nguồn còi (mảng mic), tăng tốc suy diễn (NPU/Coral).
+### Slide 15 — Đã triển khai (1/2): Tự thiết kế phần cứng camera
+- Board camera SoM **Ambarella CV25** + cảm biến Sony, ống kính varifocal điều khiển động cơ bước (zoom/focus/P-Iris qua driver TMC).
+- Mạch tự thiết kế (Altium, 5 khối: nguồn — SoM — Ethernet — giao tiếp cảm biến MIPI/I2C — điều khiển ống kính); firmware C++ GStreamer → TCP frame về Pi + UDP lệnh điều khiển ống kính từ xa.
+- Ảnh board thật/3D + sơ đồ khối; lý do: chủ động tham số thu nhận ảnh (đúng phát hiện exposure ở slide 12) + làm chủ phần cứng.
+
+### Slide 16 — Đã & đang triển khai (2/2): Cải tiến xử lý tín hiệu và điều khiển
+- **Đã làm — lọc Butterworth thông dải zero-phase (1–5 Hz) trước FFT**: khử trôi nền (bell curve xe tiến lại gần) + nhiễu rung bbox, không méo pha → **PNR 5,97 → 27,84 (+366%)** trên xe ID 13, đỉnh 2,34 Hz — 1 hình so sánh trước/sau (`so_sanh_loc_id13.png`).
+- **Đã làm — hoàn thiện vận hành**: máy trạng thái LISTENING→ALERT→CONFIRMED, đầu ra GPIO/MQTT cho hệ điều khiển đèn, giám sát nhiệt, tự kết nối lại.
+- **Đang làm — điều khiển ống kính vòng kín**: (1) vòng PI giữ độ sáng ROI bằng khẩu độ P-Iris (bám giá trị đặt — duy trì điều kiện đo tối ưu, khép vòng chính phát hiện exposure của đồ án); (2) autofocus tìm cực trị theo độ nét ảnh (extremum-seeking, cùng nguyên lý MPPT). Chỉ nói "đang làm" nếu chưa có kết quả đo; có đồ thị hội tụ thì chuyển thành "đã làm".
+
+### Slide 17 — Hướng phát triển & Lời cảm ơn (quyển 4.2)
+- Dataset đa dạng hơn; mô hình tối ưu nhúng/NPU; kết hợp V2X/GPS; tích hợp điều khiển đèn tín hiệu quy mô lớn; (nếu thích: ước lượng vận tốc xe qua dịch tần Doppler của còi).
 - "Em xin chân thành cảm ơn quý thầy cô. Em sẵn sàng nhận câu hỏi."
 
 ---
 
-## SLIDE DỰ PHÒNG (BACKUP — sau slide cảm ơn, chỉ mở khi bị hỏi)
+## SLIDE DỰ PHÒNG (BACKUP)
 
-- B1. Tập dữ liệu: cấu trúc dataset âm thanh (positive/negative, train/val/test) và ảnh (7 lớp, ~320 MB), cách thu và gán nhãn.
-- B2. Đường cong huấn luyện 2 mô hình (loss/mAP theo epoch) + lý do chọn/lượng tử hóa INT8 (giảm kích thước, chạy CPU Pi). Ghi chú quá trình: lượng tử hóa BiLSTM từng lỗi (toán tử LSTM/attention khó quantize trong TFLite) → giai đoạn đầu dùng GRU thay thế, sau đã khắc phục và quantize trực tiếp CNN-BiLSTM-Attention — câu chuyện tốt nếu bị hỏi "vì sao chọn kiến trúc này".
-- B3. Toán bộ lọc: đáp ứng biên-pha Butterworth, vì sao zero-phase (filtfilt) — không méo pha tín hiệu nhấp nháy; chọn bậc lọc.
-- B4. Chi tiết ByteTrack: vector trạng thái Kalman 8 chiều, ghép cặp 2 tầng theo IoU.
-- B5. Giao thức truyền camera→Pi: khung TCP header 4 byte + 1 228 800 byte BGR, zero-copy phía Pi; lệnh UDP điều khiển ống kính.
-- B6. Sơ đồ nguyên lý chi tiết từng sheet Altium (nguồn, SoM, Ethernet, sensor, lens control).
-- B7. Bảng đầy đủ `benchmark_results.json` + điều kiện đo (Pi 4 rev 1.5, 1,8 GHz, backend suy diễn).
+- B1. Dataset: audio Siren/Non-Siren (nguồn, gán nhãn); ảnh 873 (611/174/88), 7 lớp, lớp exception.
+- B2. Đường huấn luyện 2 mô hình; lượng tử hóa INT8 (kích thước ↓, chạy CPU Pi; BiLSTM từng khó quantize — đã giải quyết, không phải hạ xuống GRU); so sánh float32 ↔ INT8.
+- B3. Toán FFT khối đèn: công thức tỷ số đỉnh/trung vị, lý do dùng trung vị ước lượng nền; (mở rộng: đáp ứng Butterworth, vì sao zero-phase).
+- B4. ByteTrack chi tiết: Kalman 8 trạng thái, Hungarian 2 tầng, ngưỡng score.
+- B5. Phần cứng mở rộng: schematic từng sheet Altium; giao thức TCP header 4 byte + 1 228 800 byte BGR, zero-copy; lệnh UDP CALIB/ZOOM/FOCUS/IRIS.
+- B6. Bảng benchmark đầy đủ + điều kiện đo (Pi 4 Model B, RAM, backend TFLite).
+- B7. Sơ đồ vòng điều khiển iris PI + autofocus extremum-seeking (nếu bị hỏi sâu phần mở rộng).
+- B8. Độ không đảm bảo đo tần số: Δf = 1/T_cửa_sổ, trade-off cửa sổ ↔ trễ, jitter khung hình.
 
 ---
 
-## PHÂN BỔ THỜI GIAN (mục tiêu 12–13 phút, trần 15)
+## PHÂN BỔ THỜI GIAN (mục tiêu 13 phút, trần 15)
 
 | Phần | Slide | Thời gian |
 |---|---|---|
-| Mở đầu (vấn đề, mục tiêu) | 1–4 | 2,0′ |
-| Kiến trúc + phần cứng | 5–6 | 2,5′ |
-| Ba kênh đo + quyết định | 7–10 | 3,5′ |
-| Kết quả thực nghiệm | 11–14 | 4,0′ |
-| Kết luận + hướng phát triển | 15–16 | 1,5′ |
+| Mở đầu | 1–4 | 2,0′ |
+| Thiết kế (theo quyển) | 5–9 | 4,0′ |
+| Kết quả (theo quyển) | 10–13 | 4,0′ |
+| Kết luận | 14 | 1,0′ |
+| Mở rộng sau đồ án | 15–16 | 1,5′ |
+| Hướng phát triển + cảm ơn | 17 | 0,5′ |
 
 ---
 
-## CÂU HỎI HỘI ĐỒNG TĐH DỄ HỎI (chuẩn bị trả lời ngắn, đi thẳng vấn đề — tiêu chí 2,5đ)
+## CÂU HỎI HỘI ĐỒNG DỄ HỎI (trả lời ngắn, đi thẳng — tiêu chí 2,5đ)
 
-1. **Vì sao lấy mẫu 22 050 Hz?** Phổ còi ưu tiên tập trung < 3,5 kHz; fs = 22 050 Hz thỏa Nyquist với biên rộng, cân bằng tải tính toán trên Pi.
-2. **Vì sao lọc 500–1 800 Hz / 1–5 Hz?** Dải tần cơ bản của còi hú; đèn ưu tiên nhấp nháy 60–300 lần/phút = 1–5 Hz theo đặc tính đèn thực tế.
-3. **Zero-phase filtering là gì, sao phải dùng?** Lọc xuôi rồi ngược → độ trễ pha bằng 0, không làm méo/dịch dạng sóng nhấp nháy trước khi FFT.
-4. **PNR định nghĩa thế nào, sao ngưỡng = 5?** Biên độ đỉnh / trung vị nhiễu nền trong dải 1–5 Hz; ngưỡng chọn từ thực nghiệm đối chứng xe thường/xe ưu tiên (mục 3.5).
-5. **Độ trễ từ lúc có còi đến lúc cảnh báo?** Voting 3/5 cửa sổ 170 ms (~0,5–0,85 s) + xác nhận đèn cần ≥ 30 frame (~2 s) + chu kỳ quyết định 0,5 s → nêu con số tổng và biện luận chấp nhận được cho điều khiển pha đèn.
-6. **Sai số/độ phân giải phép đo tần số đèn?** Δf = fs_frame/N; với cửa sổ 5 s @15 FPS → độ phân giải ~0,2 Hz — đủ phân biệt trong dải 1–5 Hz.
-7. **Nếu chỉ có còi mà không thấy đèn (che khuất)?** Hệ ở ALERT, chưa CONFIRMED — thiết kế chấp nhận trễ để tránh báo giả; nêu hướng mở rộng đa camera.
-8. **Đầu ra ghép với tủ đèn tín hiệu thế nào?** GPIO relay khô + MQTT; hướng phát triển: chuẩn công nghiệp (Modbus/NTCIP).
-9. **Nhiệt độ, hoạt động 24/7 có ổn định không?** Giám sát thermal zone, ngưỡng 75/80 °C, log xoay vòng, tự kết nối lại camera.
-10. **Vì sao không dùng camera thương mại?** Chủ động điều khiển ống kính (zoom/focus/iris) phục vụ phép đo, làm chủ phần cứng, chi phí — và là khối lượng kỹ thuật của đồ án.
-11. **Lượng tử hóa INT8 làm giảm độ chính xác bao nhiêu?** Nêu số so sánh float32 ↔ INT8 trên tập test (chuẩn bị sẵn từ notebook quantize); đổi lại giảm kích thước ~4× và chạy được trên CPU Pi. Nếu hỏi sâu: BiLSTM từng khó quantize (toán tử hồi tiếp), đã giải quyết được nên không phải hạ xuống GRU.
+1. **Vì sao lấy mẫu 22 050 Hz?** Phổ còi < 3,5 kHz; thỏa Nyquist với biên rộng, cân bằng tải trên Pi.
+2. **Dải lọc thông dải của em là bao nhiêu, vì sao?** Trả lời đúng MỘT con số đã chốt nhất quán trong quyển (sau bước sửa) — dải tần đặc trưng còi ưu tiên theo quy chuẩn thiết bị tín hiệu.
+3. **Tỷ số đỉnh/trung vị là gì, sao không dùng ngưỡng biên độ?** Trung vị ước lượng nền phổ bền vững với đỉnh nhiễu cục bộ; biên độ tuyệt đối biến động theo khoảng cách/ánh sáng/exposure nên không dùng.
+4. **Vì sao dải tần đèn nháy chọn như vậy?** Đèn ưu tiên nhấp nháy 60–300 lần/phút → 1–5 Hz; đỉnh 1,05 Hz của xe thường ID 104 nằm sát biên là chuyển động của xe — minh chứng cần dải chặn dưới.
+5. **Độ phân giải phép đo tần số?** Δf = 1/T_cửa_sổ (cửa sổ 5 s → 0,2 Hz) — đủ phân biệt trong dải đèn.
+6. **Độ trễ từ khi có còi đến khi kết luận?** Voting 3/5 × 0,17 s + FFT cần đủ mẫu (~2 s) → nêu tổng và biện luận đủ cho điều khiển pha đèn.
+7. **Ground truth 79 xe ưu tiên xác định thế nào?** Chuẩn bị câu trả lời cụ thể (quan sát/ghi hình đối chiếu).
+8. **INMP441 là mic I2S, code đọc thế nào?** I2S overlay trên Pi → thiết bị ALSA → thư viện thu âm; ADC tích hợp trong mic giảm nhiễu đường truyền analog.
+9. **Chỉ có còi mà không thấy đèn (che khuất)?** Chưa kết luận — thiết kế chấp nhận trễ để tránh báo giả; hướng mở rộng đa camera.
+10. **Vì sao YOLO không nhận diện thẳng "xe ưu tiên"?** Hình dáng xe ưu tiên đa dạng, dễ nhầm; hệ dùng YOLO phát hiện phương tiện rồi xác thực bằng 2 bằng chứng vật lý độc lập (còi + tần số đèn) — bền vững hơn.
+11. **Lượng tử hóa INT8 mất bao nhiêu độ chính xác?** Số so sánh float32 ↔ INT8 (chuẩn bị từ notebook); đổi lại giảm ~4× kích thước, chạy CPU Pi.
+12. **Phần mở rộng có trong quyển không?** Trả lời thẳng: thực hiện sau khi nộp quyển, sản phẩm/mã nguồn/demo sẵn sàng trình chiếu — thể hiện đồ án tiếp tục được phát triển thành sản phẩm hoàn thiện.
+13. **Điều khiển lens vòng kín cụ thể là gì?** Iris: vòng bám giá trị đặt (PI, sai lệch độ sáng ROI); focus: tìm cực trị hàm độ nét (extremum-seeking, tương tự MPPT điện mặt trời) — phân biệt rõ hai lớp bài toán.
 
 ---
 
 ## GHI CHÚ ĐANG TREO (việc cần chốt trước khi làm slide)
 
-### 1. Autofocus vòng kín theo phản hồi độ nét — ý tưởng điểm nhấn TĐH (chưa cài đặt)
-- **Bản chất**: motor focus + phản hồi là chỉ số độ nét ảnh (phương sai Laplacian / Tenengrad) = **điều khiển vòng kín**, cụ thể là **điều khiển tìm cực trị (extremum-seeking)** — không có setpoint, dò cực đại hàm độ nét bằng leo đồi thô→tinh. Ví dụ tương đồng để nói với hội đồng: **thuật toán MPPT trong điện mặt trời**.
-- Vòng khép qua mạng: frame TCP về Pi → tính độ nét → lệnh `FOCUS:<n>` UDP về board → motor → quang học → frame mới. Trễ vòng = framerate + trễ mạng.
-- Ý bảo vệ: đường cong độ nét đơn đỉnh → hội tụ; cảnh động gây nhiễu S → cần hysteresis/chạy khi cảnh tĩnh; backlash motor bước → CALIB + tiếp cận đỉnh từ một chiều.
-- **HIỆN TRẠNG: chưa có trong code** — firmware mới có lệnh FOCUS chỉnh tay (`camera_source/src/main.cpp:84`), toàn repo chưa có chỗ nào tính độ nét. **Chỉ đưa lên slide là "vòng kín" nếu đã cài đặt và demo được**, không thì trình bày là hướng phát triển. Việc cài đặt: script trên Pi tính variance-of-Laplacian trên ROI + hill-climbing + gửi UDP (hạ tầng có sẵn, khối lượng nhỏ) → vẽ đồ thị S(k) hội tụ theo số bước làm hình minh họa.
-
-### 2. Việc cần làm khác (đã ghi rải rác ở trên, gom lại)
-- Chạy lại `benchmark_pi.py` với model **BiLSTM INT8 mới** — số 71,6 ms là của GRU cũ, cần xác nhận vẫn < 170 ms.
-- Cập nhật README/notebook đang ghi "GRU" cho khớp tên CNN-BiLSTM-Attention (phòng hội đồng xem repo).
-- Điền số accuracy/mAP từ Chương 3 quyển báo cáo vào slide 11–12.
-- Chuẩn bị số so sánh float32 ↔ INT8 cho câu hỏi 11.
+1. **Sửa quyển theo kế hoạch rút gọn** (xem `ra_soat_quyen_do_an.md` mục E — bước 2/3/4 đã HỦY vì nội dung đó chuyển sang phần mở rộng): chỉ còn bước 1 (chốt bộ số nhất quán trong quyển), bước 5 (điền số liệu thiếu Chương 3), bước 6 (quét lỗi trình bày).
+2. Chạy lại `benchmark_pi.py` với model BiLSTM INT8 đang deploy — xác nhận 71,6 ms và cập nhật nếu lệch.
+3. Cập nhật README/notebook đang ghi "GRU" cho khớp CNN-BiLSTM-Attention.
+4. Tính mAP từ `yolo26n_train_results.csv` cho slide 12 (và quyển 3.3 nếu kịp).
+5. Chuẩn bị số float32 ↔ INT8 cho câu hỏi 11.
+6. Autofocus + vòng iris PI: nếu muốn slide 16 nói "đã làm" thì phải cài đặt và có đồ thị hội tụ/đáp ứng trước ngày bảo vệ (chi tiết phương án ở `ra_soat_quyen_do_an.md` mục F); chưa có thì để nguyên "đang làm".

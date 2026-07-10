@@ -3,7 +3,8 @@
 Đối chiếu quyển PDF ↔ code trong repo ↔ sườn slide. Xếp theo mức độ ưu tiên.
 (Không lặp lại các mục đã ghi ở "GHI CHÚ ĐANG TREO" trong `slide_outline_bao_ve.md`.)
 
-> **ĐÃ CHỐT (10/07): quyển sửa được** (trong mức độ hợp lý) → mọi mục nhóm A xử lý theo hướng **sửa quyển cho khớp hệ thống thực tế**, slide bám theo quyển sau khi sửa. Kế hoạch sửa cụ thể ở cuối file.
+> **ĐÃ CHỐT LẠI (10/07, lần 2): slide bám đúng quyển hiện tại.** Phần cứng camera CV25, lọc Butterworth zero-phase/PNR, máy trạng thái + GPIO/MQTT, điều khiển ống kính vòng kín → **KHÔNG đưa vào quyển**, gom thành mục "Triển khai mở rộng sau đồ án" trên slide (15–16) với tinh thần "nộp quyển xong vẫn tiếp tục nghiên cứu".
+> Hệ quả: các mục **A1, A2, A4 tự giải quyết** (không còn là mâu thuẫn — là phần phát triển sau); kế hoạch E chỉ còn hiệu lực **bước 1, 5, 6** (chốt số nhất quán, điền số thiếu, quét lỗi); **bước 2, 3, 4 HỦY**. Mục F giữ nguyên làm nội dung slide mở rộng + phương án cài đặt.
 
 ---
 
@@ -92,8 +93,9 @@ Lập một "bảng số liệu chuẩn" dùng chung cho quyển + slide, lấy 
 - Dải tần đèn nháy: **1–5 Hz** (`FFT_FREQ_MIN/MAX`) — định nghĩa Ω tại 2.6.5, sửa "2–4 Hz" ở 3.5.3.
 - Ngưỡng: PNR ≥ **5.0**, năng lượng màu ≥ **5.0**, voting **3/5**, cửa sổ **2 s / trượt 0,17 s**, YOLO chạy **mỗi 9 frame**, fs **22050 Hz** (sửa typo 22500 ở 2.3.2a).
 - Tên cảm biến ảnh: chốt theo phần cứng thật (schematic là **IMX415** → sửa "IMX678" ở tóm tắt, hoặc ngược lại nếu board thật dùng IMX678 — kiểm tra BOM).
+- *(Lưu ý sau khi chốt lại chiến lược: dải đèn 1–5 Hz và ngưỡng PNR thuộc code/phần mở rộng; trong quyển chỉ cần đảm bảo Ω và T được định nghĩa nhất quán nội bộ — 2.6.5 và 3.5.3 đang lệch nhau 2–4 Hz vs không định nghĩa.)*
 
-### Bước 2 — Bổ sung phần cứng camera CV25 (A1) — khối lượng lớn nhất
+### ~~Bước 2~~ — HỦY (chuyển thành slide mở rộng 15) — Bổ sung phần cứng camera CV25 (A1)
 - Thêm mục mới vào Chương 2 (đề xuất: **2.9. Thiết kế phần cứng camera** sau 2.8, hoặc thay hẳn 2.8.4):
   - 2.9.1 Yêu cầu: điều khiển được exposure/gain (phục vụ phép đo FFT — nối thẳng với 3.5.6), ống kính zoom/focus/iris chỉnh từ xa, truyền frame ổn định qua Ethernet.
   - 2.9.2 Thiết kế mạch: 5 sheet Altium (Nguồn, SoM CV25, Ethernet, giao tiếp cảm biến MIPI/I2C, điều khiển ống kính TMC) — chèn ảnh schematic/3D từ `hardware/CV25_Camera_DATN/`.
@@ -101,13 +103,13 @@ Lập một "bảng số liệu chuẩn" dùng chung cho quyển + slide, lấy 
 - **Viết lại 2.8.4** cho khớp: thay đoạn "đề tài không tập trung vào thiết kế cảm biến hình ảnh" bằng lý do tự thiết kế camera (chủ động tham số thu nhận ảnh phục vụ phép đo + làm chủ phần cứng).
 - Cập nhật: tóm tắt đầu quyển (thêm camera tự thiết kế vào danh mục phần cứng), 3.1.1 (cấu hình thực nghiệm), 4.1 (kết luận — thêm đóng góp phần cứng), 4.2 (hướng phát triển — thêm autofocus vòng kín nếu kịp cài đặt).
 
-### Bước 3 — Bổ sung lọc Butterworth zero-phase + PNR vào khối đèn (A2)
+### ~~Bước 3~~ — HỦY (chuyển thành slide mở rộng 16) — Bổ sung lọc Butterworth zero-phase + PNR (A2)
 - 2.6.3: sau đoạn xây dựng chuỗi R(t)/B(t), thêm bước **lọc thông dải Butterworth bậc 2, 1–5 Hz, zero-phase (lọc xuôi–ngược)** — nêu lý do: khử trôi nền (xe tiến lại gần/ra xa tạo bell curve như ID 104) và nhiễu rung bbox, không méo pha trước FFT.
 - 2.6.4: thêm cửa sổ Hann trước FFT (giảm rò rỉ phổ).
 - 3.5: thêm tiểu mục "Hiệu quả của bộ lọc" — chèn hình `docs/images/so_sanh_loc_id13.png` (+ id104, id115, emergency nếu cần), nêu số **PNR 5,97 → 27,84 (+366%), đỉnh 2,34 Hz**; ID 104 bị loại nhờ ngưỡng năng lượng màu.
 - Danh mục hình + mục lục cập nhật theo.
 
-### Bước 4 — Bổ sung cơ chế ra quyết định + đầu ra (A4)
+### ~~Bước 4~~ — HỦY (chuyển thành slide mở rộng 16) — Bổ sung máy trạng thái + đầu ra (A4)
 - 2.7.2: thay mô tả tuần tự 9 bước bằng (hoặc bổ sung) **máy trạng thái LISTENING → ALERT → CONFIRMED**, chu kỳ 0,5 s, timeout 30 s, cơ chế lùi CONFIRMED→ALERT — vẽ 1 hình state diagram (điểm cộng với hội đồng TĐH).
 - Thêm mục nhỏ "Đầu ra hệ thống": GPIO BCM17, MQTT JSON, lưu frame chú thích; và "Cơ chế vận hành bền vững": tự kết nối lại camera, giám sát nhiệt 75/80°C, log xoay vòng (lấy từ `deploy/decision/`).
 - 3.6 cập nhật tương ứng (quy trình hoạt động theo state machine).
