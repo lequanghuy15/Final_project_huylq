@@ -236,6 +236,12 @@ Sơ đồ phễu (vẽ được lên bảng): fs/2 = 11.025 ⊃ Mel 300–3500 �
 
 **[Ngắn]** Vòng bám giá trị đặt kinh điển: biến quá trình = độ sáng trung bình ROI; giá trị đặt I_ref = mức sáng cho chất lượng phép đo tốt nhất (rút từ khảo sát exposure); cơ cấu chấp hành = động cơ bước P-Iris; sai lệch e = I_ref − I_ROI đưa vào bộ PI, đầu ra là số bước dịch khẩu độ. Đối tượng thực chất là khâu khuếch đại tĩnh (tuyến tính hóa quanh điểm làm việc) cộng **trễ vận chuyển 1–3 khung hình** — nhận dạng bằng đáp ứng bậc thang, chỉnh Ki theo dự trữ pha, có anti-windup vì khẩu độ bão hòa hai đầu.
 
+## G1b. Vì sao chọn PI — sao không P thuần hay PID đầy đủ?
+
+**[Ngắn]** Chọn từng thành phần theo cái đối tượng cần: đối tượng là khâu khuếch đại có **trễ chết**, không có tích phân sẵn → cần **I** để triệt sai lệch tĩnh, bám đúng setpoint 0,9 FS (P thuần luôn còn e_ss = r/(1+Kp·K)); **P** thêm vào để tăng tốc quá độ; **D chủ động không dùng** vì (1) đối tượng bị chi phối bởi trễ chết thuần — derivative không bù được trễ chết (kết quả kinh điển của điều khiển quá trình); (2) phép đo đỉnh nhiễu dạng bậc thang (nhảy theo nhịp đèn chớp) — D khuếch đại nhiễu thành lệnh giật lên motor iris.
+
+**[Sâu]** I thuần thực ra đã đủ chạy cho lớp đối tượng gain+trễ (auto-exposure thương mại nhiều bản chỉ có I + kẹp giới hạn). Nếu trễ chết là nút thắt thực sự, nâng cấp đúng bài là **bộ dự báo Smith** (mô hình nội bù trễ), không phải thêm D. Muốn dùng D với phép đo nhiễu thì phải lọc D — mà lọc lại thêm trễ, tự triệt tiêu lợi ích.
+
 ## G2. Autofocus không có setpoint sao gọi là vòng kín?
 
 **[Ngắn]** Nó là vòng kín thuộc lớp khác: **điều khiển tìm cực trị**. Không đặt được "độ nét mong muốn" vì giá trị đỉnh không biết trước; nhưng tại đúng điểm nét, đạo hàm độ nét theo vị trí bằng 0 — nên "giá trị đặt" chính là **gradient = 0**. Bộ điều khiển nhiễu loạn nhỏ vị trí focus, quan sát độ nét tăng hay giảm, đi về phía tăng — perturb-and-observe, cùng nguyên lý MPPT điện mặt trời. Lưu ý sâu: tại đỉnh, khuếch đại tuyến tính hóa bằng 0 nên công cụ LTI bất lực đúng tại điểm làm việc — đó là lý do bản chất phải dùng nhiễu loạn dò, không phải chọn cho lạ.
