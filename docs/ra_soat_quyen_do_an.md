@@ -131,7 +131,19 @@ Lập một "bảng số liệu chuẩn" dùng chung cho quyển + slide, lấy 
 
 Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (đồ thị hội tụ, bảng số), không thêm cái chỉ vẽ sơ đồ. Xếp theo tỷ lệ hiệu quả/công sức:
 
-### F1. Vòng điều khiển khẩu độ P-Iris giữ điều kiện đo tối ưu ⭐ (khuyến nghị làm nhất)
+### F1. Vòng điều khiển độ sáng ROI — NÂNG CẤP 2 CƠ CẤU: exposure + P-Iris (mid-ranging) ⭐
+
+**Phiên bản chốt (11/07): một biến quá trình (I_ROI), hai cơ cấu chấp hành — cấu trúc MID-RANGING (valve-position control), kinh điển điều khiển quá trình.**
+- **Vòng nhanh PI₁**: e₁ = I_ref − I_ROI → chỉnh **exposure time** (điện tử, tác động frame sau, mịn) — dập nhiễu sáng đột ngột.
+- **Vòng chậm PI₂**: e₂ = t_e* − t_e → dịch **iris** (cơ khí, chậm), với t_e* = exposure tối ưu cho tương phản nhấp nháy (từ khảo sát 3.5.6). Setpoint vòng chậm là CHÍNH exposure — đây là chỗ "duy trì điều kiện đo tối ưu" được mã hóa vào cấu trúc điều khiển.
+- Cơ chế: sáng dần → PI₁ rút ngắn t_e → t_e < t_e* → PI₂ khép iris từ từ → PI₁ nới t_e về t_e*. Xác lập: iris hấp thụ biến thiên sáng chậm (ngày–đêm), exposure đậu quanh điểm tối ưu, còn nguyên dải chỉnh nhanh 2 phía.
+- Ràng buộc thiết kế: tách băng thông ~10× (iris chậm hơn); deadband/hysteresis cho iris (chống săn bước, mòn motor); anti-windup 2 vòng; **t_e = bội số 10 ms chống flicker điện lưới 50 Hz**; ban đêm iris mở hết → tầng 3 = gain (split-range 3 nấc), chấp nhận nhiễu tăng.
+- Kiểm chứng: (1) nhận dạng bậc thang từng cơ cấu; (2) kịch bản che/rọi — vẽ đồng thời I_ROI(t), t_e(t), iris(t) thấy "vũ đạo" mid-ranging; (3) PNR trước/sau khi bật vòng trong điều kiện sáng thay đổi.
+- Triển khai: firmware cần thêm lệnh UDP `EXPOSURE:<µs>` (gọi API ISP Ambarella) — hiện mới có CALIB/ZOOM/FOCUS/IRIS.
+
+*(Phiên bản gốc chỉ-iris giữ bên dưới để tham khảo — vẫn đúng, nhưng bản 2 cơ cấu "nặng ký" hơn nhiều với hội đồng.)*
+
+### F1-cũ. Vòng điều khiển khẩu độ P-Iris giữ điều kiện đo tối ưu (bản 1 cơ cấu)
 - **Ý tưởng**: quyển 3.5.6 đã phát hiện exposure/độ sáng ảnh hưởng trực tiếp biên độ tín hiệu nhấp nháy và PNR → **khép vòng chính phát hiện đó**: đo độ sáng trung bình ROI trên Pi → bộ điều khiển PI → lệnh `IRIS:<pos>` qua UDP (firmware đã có sẵn!) → giữ độ sáng ROI bám giá trị đặt.
 - **Chất TĐH**: đây là vòng kín **bám giá trị đặt kinh điển** (có setpoint, sai lệch e = I_ref − I_ROI, bộ PI, cơ cấu chấp hành động cơ bước P-Iris, đối tượng là quang học + ISP). Dễ bảo vệ hơn extremum-seeking, vẽ được sơ đồ khối chuẩn, đo được đáp ứng quá độ (overshoot, thời gian xác lập) khi thay đổi ánh sáng đột ngột.
 - **Câu chuyện đẹp**: "phát hiện tham số camera ảnh hưởng phép đo (3.5.6) → thiết kế vòng điều khiển duy trì điều kiện đo tối ưu" — kết quả nghiên cứu dẫn tới thiết kế điều khiển, đúng quy trình kỹ thuật.
