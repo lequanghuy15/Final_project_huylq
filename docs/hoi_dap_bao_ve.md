@@ -207,7 +207,10 @@ Sơ đồ phễu (vẽ được lên bảng): fs/2 = 11.025 ⊃ Mel 300–3500 �
 
 ## F2. Ground truth 79 xe ưu tiên trong 12 ngày lấy bằng gì?
 
-**[Ngắn — PHẢI chuẩn bị câu trả lời thật của bạn]** Khung trả lời: ghi hình/ghi âm liên tục song song với hệ thống; sau đó người kiểm tra lại toàn bộ băng ghi để đếm thủ công các lượt xe ưu tiên thật (nghe + nhìn), đối chiếu timestamp với log hệ thống để phân loại đúng/sót/giả. Nói rõ ai đếm, tiêu chí tính "một lượt", và cách xử lý trường hợp biên (còi xa nghe mờ).
+**[Ngắn]** Hệ đặt tại chốt bảo vệ cạnh đường (có nguồn điện, trông giữ được thiết bị), chạy liên tục 12 ngày, **vừa phát hiện thời gian thực vừa ghi âm lưu trữ toàn bộ**. Ground truth rà soát thủ công theo **hai chiều**: (1) kiểm định phát hiện — cuối ngày nghe lại từng đoạn hệ gắn cờ, phân loại thật/giả → 76 đúng, 8 báo giả; (2) tìm bỏ sót — quét lại bản ghi lưu trữ bằng chính mô hình nhưng **hạ ngưỡng nhạy** (gắn cờ mọi ứng viên), nghe xác minh từng ứng viên → tìm được 3 lượt còi thật bản online không báo. Tổng 79 lượt. "Một lượt" = một xe đi qua tầm thu một lần; còi ngắt quãng trong cùng lần đi qua vẫn tính một.
+
+**[Sâu — câu thòng chủ động về giới hạn]** Ground truth này định nghĩa **trong tầm thu của hệ đo** — xe quá xa mà cả máy lẫn tai người không nghe được nằm ngoài phạm vi đánh giá; nguồn tham chiếu độc lập tuyệt đối (dữ liệu điều phối 115/114) là đề xuất cho giai đoạn thử nghiệm lớn hơn. Nói chủ động câu này = ghi điểm "hiểu phạm vi định nghĩa của phép đo".
+⚠️ **Điều kiện tiên quyết**: chiều rà soát thứ (2) phải THỰC SỰ đã làm — nếu mới chỉ nghe lại các phát hiện thì con số "79 thực tế / 3 bỏ sót" không có phương pháp chống lưng ("không nghe đoạn hệ không báo sao biết sót 3?"). Bản ghi 12 ngày còn đó → chạy offline ngưỡng thấp (prob>0,3, voting 1/5) + nghe xác minh, một buổi tối là xong.
 
 ## F3. Chạy 24/7 ngoài trời — nhiệt độ, ổn định thế nào?
 
