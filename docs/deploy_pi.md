@@ -8,7 +8,9 @@ Sơ đồ kết nối vật lý:
    UDP server :8080 (nhận lệnh lens)   |--> MQTT broker (tùy chọn, qua mạng)
 ```
 
-Vai trò mạng (đúng theo `deploy/vision/camera.py` và `camera_source/`): **Pi là TCP SERVER** — `main.py` bind `0.0.0.0:8089` và chờ; **CV25 là client** tự kết nối và tự thử lại khi đứt → thứ tự bật nguồn hai thiết bị không quan trọng.
+Vai trò mạng (đúng theo `deploy/vision/camera.py` và `camera_source/`): **Pi là TCP SERVER**, **CV25 là client** tự kết nối và thử lại theo từng frame → thứ tự bật nguồn hai thiết bị không quan trọng.
+
+⚠️ **Lưu ý quan trọng**: cổng 8089 **không mở thường trực** — `vision_thread` chỉ gọi `camera.start()` (bind+listen) khi có còi kích hoạt (`camera_active=True`) và đóng hẳn server socket khi hết còi. Đây là thiết kế chủ đích: lúc nhàn rỗi, client không gửi được → luồng 147 Mbit/s bị chặn từ nguồn (tiết kiệm cả băng thông, không chỉ CPU). Trễ đánh thức ~0,1 s (client thử lại mỗi ~67 ms) — không đáng kể so với 2 s FFT cần tích lũy. Hệ quả khi kiểm tra: `ss -tlnp | grep 8089` chỉ thấy cổng khi đang ALERT hoặc chạy `--force-alert`.
 
 ---
 
