@@ -141,7 +141,15 @@ Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (
 - Kiểm chứng: (1) nhận dạng bậc thang từng cơ cấu; (2) kịch bản che/rọi — vẽ đồng thời I_ROI(t), t_e(t), iris(t) thấy "vũ đạo" mid-ranging; (3) PNR trước/sau khi bật vòng trong điều kiện sáng thay đổi.
 - Triển khai: firmware cần thêm lệnh UDP `EXPOSURE:<µs>` (gọi API ISP Ambarella) — hiện mới có CALIB/ZOOM/FOCUS/IRIS.
 
-*(Phiên bản gốc chỉ-iris giữ bên dưới để tham khảo — vẫn đúng, nhưng bản 2 cơ cấu "nặng ký" hơn nhiều với hội đồng.)*
+**NÂNG CẤP 2 (11/07) — setpoint là ĐỘ SÁNG ĐỈNH (lúc đèn bật), không phải trung bình:**
+- Lý do đo lường: bão hòa cảm biến = phi tuyến cứng cắt ngọn dạng sóng → **hài giả trong FFT**; bài toán gốc là tối ưu biên độ có ràng buộc không-bão-hòa → nghiệm nằm trên biên → **quy về điều chỉnh bám biên**: r = I_peak_ref ≈ 0,85–0,9 toàn thang (~230/255).
+- Khâu đo đỉnh: cửa sổ trượt W ≥ 1 chu kỳ nháy chậm nhất (1 Hz → 15 frame) hoặc bao hình ŷ(k)=max(I(k), λŷ(k−1)) — **có động học, trễ ≈ W/2 ≈ 0,5 s, phải tính vào ổn định** (trễ vòng bị khâu đo chi phối, không phải camera).
+- **Tuyến tính hóa bằng miền log**: ln I = ln c + ln Φ + ln t_e − 2 ln N → đối tượng thành phép cộng, gain = 1 mọi điểm làm việc (đơn vị EV/stop) → PI trong miền log không cần gain-scheduling. (Máy ảnh thương mại làm AE theo EV đúng vì vậy.)
+- Chỉnh định mẫu: vòng I, T_s = 67 ms, L ≈ 0,63 s; PM 60° → ω_c = π/(6L) ≈ 0,83 rad/s → K_i ≈ 0,83 (kiểm chứng L thực bằng bậc thang trước).
+- **Switching control 2 chế độ**: A = AE thường (PV = trung bình, phục vụ YOLO) ↔ B = bám đỉnh (khi có track nghi nháy, phục vụ phép đo); chuyển chế độ **bumpless transfer** (khởi tạo integrator = đầu ra hiện hành). Bão hòa → phép đo một phía → anti-windup + bước thô −1..2 EV khi kẹt trần.
+- Kiểm chứng: bậc thang log-domain (gain≈1, đo L); kịch bản xe tiến gần — ŷ_peak bám 0,9 FS + FFT không hài giả (đối chứng tắt vòng → bão hòa → hài bậc cao); chuyển A↔B không giật.
+
+*(Phiên bản gốc chỉ-iris giữ bên dưới để tham khảo — vẫn đúng, nhưng bản 2 cơ cấu + setpoint đỉnh "nặng ký" hơn nhiều với hội đồng.)*
 
 ### F1-cũ. Vòng điều khiển khẩu độ P-Iris giữ điều kiện đo tối ưu (bản 1 cơ cấu)
 - **Ý tưởng**: quyển 3.5.6 đã phát hiện exposure/độ sáng ảnh hưởng trực tiếp biên độ tín hiệu nhấp nháy và PNR → **khép vòng chính phát hiện đó**: đo độ sáng trung bình ROI trên Pi → bộ điều khiển PI → lệnh `IRIS:<pos>` qua UDP (firmware đã có sẵn!) → giữ độ sáng ROI bám giá trị đặt.
