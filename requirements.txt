@@ -4,4 +4,8 @@ scipy>=1.7.0
 librosa>=0.8.0
 pyaudio>=0.2.11
 paho-mqtt>=1.6.0
-tflite-runtime>=2.5.0
+# Runtime suy dien TFLite INT8: tflite-runtime chi co wheel den Python 3.11;
+# tu 3.12 tro len dung ai-edge-litert (code tu fallback theo chuoi
+# tflite_runtime -> ai_edge_litert -> tensorflow trong *_detector.py)
+tflite-runtime>=2.5.0; python_version < "3.12"
+ai-edge-litert>=1.0.0; python_version >= "3.12"

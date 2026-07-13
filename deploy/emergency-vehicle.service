@@ -1,0 +1,20 @@
+[Unit]
+Description=He thong nhan dien xe uu tien 24/7 (audio + vision + FFT)
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=huylq
+WorkingDirectory=/home/huylq/deploy
+ExecStart=/usr/bin/python3 main.py --camera socket://0.0.0.0:8089
+Restart=always
+RestartSec=5
+# Cho phep truy cap GPIO/audio
+SupplementaryGroups=gpio audio
+# Log ra journald (log file xoay vong da co trong ung dung)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
