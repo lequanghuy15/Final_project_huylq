@@ -98,6 +98,19 @@ Cách dùng: mỗi câu có **[Ngắn]** — câu trả lời 15–30 giây nói
 
 **[Sâu]** Aliasing: nếu tín hiệu chứa thành phần f > f_s/2, sau lấy mẫu nó "gấp" về tần số giả f_s − f, không thể phân biệt và không thể sửa. Chống bằng lọc thông thấp trước lấy mẫu — trong micro số, bộ lọc decimation của ADC Sigma-Delta đảm nhiệm việc này.
 
+## C1b. Phổ còi chỉ khoảng 500–1600 Hz, sao trong bài dùng nhiều con số tần số thế?
+
+**[Ngắn]** Các con số không mâu thuẫn mà **lồng nhau như một cái phễu**, mỗi số một tầng của chuỗi đo:
+- **500–1600 Hz**: dải **tần số cơ bản** của còi theo quy chuẩn thiết bị — cao độ tiếng còi quét trong khoảng này.
+- **Lọc thông dải 500–1800 Hz**: đặt rộng hơn dải cơ bản vì (1) **hiệu ứng Doppler** — xe 70 km/h tiến lại làm 1600 Hz dịch lên ~1700 Hz (f′ = f·c/(c−v) = 1600×343/323 ≈ 1699); (2) bộ lọc thực có **sườn chuyển tiếp thoải** (−3 dB ngay tại tần số cắt) nên biên cắt phải nằm ngoài dải tín hiệu cần giữ.
+- **Mel 300–3500 Hz**: **khung quan sát đặc trưng** — còi không phải sóng sin thuần mà có **hài bậc 2, 3** (2×1600 = 3200 Hz < 3500); cấu trúc hài là "âm sắc" giúp phân biệt còi thật với âm khác trùng tần số cơ bản.
+- **fs 22.050 Hz**: tần số lấy mẫu, > 2× thành phần cao nhất quan sát (3500 Hz) theo Nyquist; chọn bằng nửa chuẩn 44,1 kHz để tương thích dữ liệu sẵn có.
+
+Sơ đồ phễu (vẽ được lên bảng): fs/2 = 11.025 ⊃ Mel 300–3500 ⊃ Lọc 500–1800 ⊃ Cơ bản 500–1600.
+
+**[Sâu]** Nếu hỏi "đã lọc 1800 thì Mel lên 3500 làm gì": sườn Butterworth thoải nên hài trên 1800 Hz chỉ bị suy giảm chứ không triệt tiêu — dải Mel cao vẫn thu phần còn lại; đồng thời "phần dư phổ" vùng cao của nhiễu (còi hơi, phanh rít) khác hẳn còi thật, thành đặc trưng phân biệt cho mô hình. Còn **1–5 Hz** là miền đo khác hoàn toàn: tần số nhấp nháy ánh sáng đèn trên chuỗi khung hình, không thuộc phổ âm thanh.
+⚠️ Câu này chỉ đứng vững khi quyển đã chốt số nhất quán (mục A3 `ra_soat_quyen_do_an.md`) — nếu quyển còn ghi 600–1500 ở 2.3.2 thì phải sửa trước.
+
 ## C2. Bộ lọc Butterworth là gì, vì sao chọn nó, "bậc 4" nghĩa là gì?
 
 **[Ngắn]** Butterworth là bộ lọc có đáp ứng biên độ **phẳng tối đa trong dải thông** — không gợn sóng, nên không làm méo tương quan năng lượng giữa các tần số trong dải giữ lại, điều quan trọng khi phía sau còn trích đặc trưng phổ. "Bậc 4" quyết định độ dốc sườn chắn: mỗi bậc cho 20 dB/decade, bậc 4 cho 80 dB/decade — đủ dốc để chặn tiếng động cơ tần thấp mà chi phí tính toán vẫn nhỏ.
