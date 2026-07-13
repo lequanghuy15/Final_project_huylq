@@ -149,6 +149,12 @@ Nguyên tắc: chỉ thêm cái **có kết quả đo thật để trình ra** (
 - **Switching control 2 chế độ**: A = AE thường (PV = trung bình, phục vụ YOLO) ↔ B = bám đỉnh (khi có track nghi nháy, phục vụ phép đo); chuyển chế độ **bumpless transfer** (khởi tạo integrator = đầu ra hiện hành). Bão hòa → phép đo một phía → anti-windup + bước thô −1..2 EV khi kẹt trần.
 - Kiểm chứng: bậc thang log-domain (gain≈1, đo L); kịch bản xe tiến gần — ŷ_peak bám 0,9 FS + FFT không hài giả (đối chứng tắt vòng → bão hòa → hài bậc cao); chuyển A↔B không giật.
 
+**CHỐT PHÁT BIỂU (12/07) — mục tiêu "đèn nổi bật so với nền" có phải vòng PI không:**
+- Vật lý (chỉnh chuẩn): đèn là **nguồn phát** (độ chói tự thân, không phụ thuộc môi trường); nền là **vật phản xạ** (∝ ánh sáng môi trường). Bóp exposure/iris → cả hai cùng tối nhưng nền chìm vào sàn nhiễu/mức đen trước → "triệt nhiễu nền".
+- **BẪY lý thuyết**: KHÔNG PI trực tiếp lên tương phản C = I_đèn/I_nền được vì (1) "max" không phải setpoint; (2) trong vùng tuyến tính cảm biến, exposure/iris nhân cả tử lẫn mẫu → C bất biến → **gain đối tượng ≈ 0**, PI trôi kịch biên. C chỉ đổi qua 2 đầu phi tuyến (hết bão hòa ở trên / nền chìm mức đen ở dưới).
+- Cách hợp lệ (= thiết kế đã chốt): **PV = I_đỉnh vùng đèn (percentile 99 ROI), setpoint 0,9 FS, PI + mid-ranging**; độ nổi bật đạt cực đại **gián tiếp như hệ quả cấu trúc**. C = KPI giám sát/log, không phải PV.
+- Câu nói chuẩn: "tương phản bất biến với cơ cấu trong vùng tuyến tính nên em chuyển thành bài toán điều chỉnh tương đương: ghim đỉnh 90% toàn thang — đèn cao nhất không bão hòa, nền bị nén thấp nhất cảnh cho phép, tương phản cực đại như hệ quả; C được giám sát như chỉ số chất lượng phép đo."
+
 *(Phiên bản gốc chỉ-iris giữ bên dưới để tham khảo — vẫn đúng, nhưng bản 2 cơ cấu + setpoint đỉnh "nặng ký" hơn nhiều với hội đồng.)*
 
 ### F1-cũ. Vòng điều khiển khẩu độ P-Iris giữ điều kiện đo tối ưu (bản 1 cơ cấu)
